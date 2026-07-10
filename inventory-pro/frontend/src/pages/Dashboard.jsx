@@ -104,7 +104,7 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 rounded-xl border border-l-green-500">
             <div className="bg-white rounded-xl border border-[#eceee9] p-5">
               <div className="flex justify-between items-start mb-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#8a8f9c]">
@@ -120,7 +120,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border border-[#eceee9] p-5">
+            <div className="bg-white rounded-xl border border-[#eceee9] p-4 border-l-red-500">
               <div className="flex justify-between items-start mb-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#8a8f9c]">
                   Low stock items
@@ -137,7 +137,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border border-[#eceee9] p-5">
+            <div className="bg-white rounded-xl border border-[#eceee9] p-4 border-l-green-900">
               <div className="flex justify-between items-start mb-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#8a8f9c]">
                   Total stock value
