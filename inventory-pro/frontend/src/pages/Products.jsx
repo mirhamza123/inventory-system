@@ -268,13 +268,6 @@ export default function Products() {
                 >
                   Save Product
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="rounded border px-4 py-2 text-sm"
-                >
-                  Cancel
-                </button>
               </div>
             </form>
           </Modal>
