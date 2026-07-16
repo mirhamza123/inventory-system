@@ -5,6 +5,7 @@ import Topbar from "../components/Topbar";
 import ProductRow from "../components/ProductRow";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
+import Modal from "../components/Modal";
 
 const buildStats = (products) => {
   const totalUnits = products.reduce(
@@ -51,6 +52,7 @@ const buildStats = (products) => {
 export default function Products() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({
     name: "",
     sku: "",
@@ -109,7 +111,11 @@ export default function Products() {
                 Manage and track your warehouse stock levels in real time.
               </p>
             </div>
-            <button className="flex items-center gap-1.5 rounded-lg bg-[#1a2540] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#253258]">
+            <button
+              type="button"
+              onClick={() => setShowModal(true)}
+              className="flex items-center gap-1.5 rounded-lg bg-[#1a2540] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#253258]"
+            >
               <Plus size={15} />
               Add new product
             </button>
@@ -155,7 +161,7 @@ export default function Products() {
             )}
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+          <div className="grid gap-6">
             <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
               <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
                 <h3 className="text-sm font-semibold text-slate-700">
@@ -209,52 +215,65 @@ export default function Products() {
                 </table>
               </div>
             </div>
+          </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-6">
-              <h2 className="mb-4 text-lg font-semibold">Add new product</h2>
-              <form onSubmit={handleSubmit} className="space-y-3">
-                <input
-                  className="w-full rounded border border-slate-200 p-3 text-sm"
-                  placeholder="Name"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                />
-                <input
-                  className="w-full rounded border border-slate-200 p-3 text-sm"
-                  placeholder="SKU"
-                  value={form.sku}
-                  onChange={(e) => setForm({ ...form, sku: e.target.value })}
-                />
-                <input
-                  className="w-full rounded border border-slate-200 p-3 text-sm"
-                  placeholder="Category"
-                  value={form.category}
-                  onChange={(e) =>
-                    setForm({ ...form, category: e.target.value })
-                  }
-                />
-                <input
-                  className="w-full rounded border border-slate-200 p-3 text-sm"
-                  type="number"
-                  placeholder="Price"
-                  value={form.price}
-                  onChange={(e) => setForm({ ...form, price: e.target.value })}
-                />
-                <input
-                  className="w-full rounded border border-slate-200 p-3 text-sm"
-                  type="number"
-                  placeholder="Quantity"
-                  value={form.quantity}
-                  onChange={(e) =>
-                    setForm({ ...form, quantity: e.target.value })
-                  }
-                />
-                <button className="w-full rounded bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
+          <Modal open={showModal} title="Add new product" onClose={() => setShowModal(false)}>
+            <form
+              onSubmit={async (e) => {
+                await handleSubmit(e);
+                setShowModal(false);
+              }}
+              className="space-y-3"
+            >
+              <input
+                className="w-full rounded border border-slate-200 p-3 text-sm"
+                placeholder="Name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+              <input
+                className="w-full rounded border border-slate-200 p-3 text-sm"
+                placeholder="SKU"
+                value={form.sku}
+                onChange={(e) => setForm({ ...form, sku: e.target.value })}
+              />
+              <input
+                className="w-full rounded border border-slate-200 p-3 text-sm"
+                placeholder="Category"
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+              />
+              <input
+                className="w-full rounded border border-slate-200 p-3 text-sm"
+                type="number"
+                placeholder="Price"
+                value={form.price}
+                onChange={(e) => setForm({ ...form, price: e.target.value })}
+              />
+              <input
+                className="w-full rounded border border-slate-200 p-3 text-sm"
+                type="number"
+                placeholder="Quantity"
+                value={form.quantity}
+                onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+              />
+              <div className="flex items-center gap-2">
+                <button
+                  type="submit"
+                  className="rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                >
                   Save Product
                 </button>
-              </form>
-            </div>
-          </div>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="rounded border px-4 py-2 text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </Modal>
         </main>
       </div>
     </div>
