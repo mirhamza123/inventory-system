@@ -1,85 +1,61 @@
+import {
+  Bell,
+  FileText,
+  LayoutGrid,
+  LogOut,
+  Repeat,
+  Settings,
+} from "lucide-react";
 import { NavLink } from "react-router-dom";
+
+const navItems = [
+  { label: "Dashboard", to: "/dashboard", icon: LayoutGrid },
+  { label: "Products", to: "/products", icon: FileText },
+  { label: "Stock In/Out", to: "/stock", icon: Repeat },
+  { label: "Alerts", to: "/alerts", icon: Bell },
+];
 
 export default function Sidebar({ onLogout }) {
   return (
-    <aside className="w-56 bg-[#1a2540] text-white flex flex-col min-h-screen p-5">
-      <div className="pb-6 mb-4 border-b border-white/10">
+    <aside className="flex min-h-screen w-56 flex-col bg-[#1a2540] p-5 text-white">
+      <div className="mb-4 border-b border-white/10 pb-6">
         <h1 className="text-lg font-bold">InventoryPro</h1>
         <span className="text-xs uppercase tracking-wider text-slate-400">
           Warehouse Admin
         </span>
       </div>
 
-      <nav className="flex-1 flex flex-col gap-1">
-        <NavLink
-          to="/dashboard"
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2 rounded-md text-sm ${
-              isActive
-                ? "bg-[#2a3654] text-white"
-                : "text-slate-300 hover:bg-white/5"
-            }`
-          }
-        >
-          <span className="w-4 text-center">▦</span>
-          <span>Dashboard</span>
-        </NavLink>
-
-        <NavLink
-          to="/products"
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2 rounded-md text-sm ${
-              isActive
-                ? "bg-[#2a3654] text-white"
-                : "text-slate-300 hover:bg-white/5"
-            }`
-          }
-        >
-          <span className="w-4 text-center">▭</span>
-          <span>Products</span>
-        </NavLink>
-
-        <NavLink
-          to="/stock"
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2 rounded-md text-sm ${
-              isActive
-                ? "bg-[#2a3654] text-white"
-                : "text-slate-300 hover:bg-white/5"
-            }`
-          }
-        >
-          <span className="w-4 text-center">⇄</span>
-          <span>Stock In/Out</span>
-        </NavLink>
-
-        <NavLink
-          to="/alerts"
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2 rounded-md text-sm ${
-              isActive
-                ? "bg-[#2a3654] text-white"
-                : "text-slate-300 hover:bg-white/5"
-            }`
-          }
-        >
-          <span className="w-4 text-center">🔔</span>
-          <span>Alerts</span>
-        </NavLink>
+      <nav className="flex flex-1 flex-col gap-1">
+        {navItems.map(({ label, to, icon: Icon }) => (
+          <NavLink
+            key={label}
+            to={to}
+            className={({ isActive }) =>
+              `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
+                isActive
+                  ? "border-l-2 border-emerald-400 bg-[#2a3654] text-white"
+                  : "text-slate-400 hover:bg-white/5"
+              }`
+            }
+          >
+            <Icon size={16} />
+            <span>{label}</span>
+          </NavLink>
+        ))}
       </nav>
 
-      <div className="pt-3 border-t border-white/10 flex flex-col gap-1">
+      <div className="flex flex-col gap-1 border-t border-white/10 pt-3">
         <NavLink
           to="/settings"
           className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2 rounded-md text-sm ${
+            `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
               isActive
-                ? "bg-[#2a3654] text-white"
-                : "text-slate-300 hover:bg-white/5"
+                ? "border-l-2 border-emerald-400 bg-[#2a3654] text-white"
+                : "text-slate-400 hover:bg-white/5"
             }`
           }
         >
-          <span className="w-4 text-center">⚙</span>
+          <Settings size={16} />
           <span>Settings</span>
         </NavLink>
 
@@ -88,9 +64,9 @@ export default function Sidebar({ onLogout }) {
             e.preventDefault();
             onLogout && onLogout();
           }}
-          className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-slate-300 hover:bg-white/5"
+          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-400 transition hover:bg-white/5"
         >
-          <span className="w-4 text-center">⇥</span>
+          <LogOut size={16} />
           <span>Logout</span>
         </button>
       </div>
