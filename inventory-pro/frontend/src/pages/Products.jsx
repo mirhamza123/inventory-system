@@ -217,7 +217,11 @@ export default function Products() {
             </div>
           </div>
 
-          <Modal open={showModal} title="Add new product" onClose={() => setShowModal(false)}>
+          <Modal
+            open={showModal}
+            title="Add new product"
+            onClose={() => setShowModal(false)}
+          >
             <form
               onSubmit={async (e) => {
                 await handleSubmit(e);
