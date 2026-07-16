@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../utils/api";
 import Sidebar from "../components/Sidebar";
+import { useAuth } from "../context/AuthContext";
 
 export default function Dashboard() {
   const [activities, setActivities] = useState([]);
@@ -59,8 +61,17 @@ export default function Dashboard() {
     };
   }, []);
 
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
   const handleLogout = () => {
-    console.log("logout");
+    // perform logout via AuthContext and redirect to login
+    try {
+      logout();
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
+    navigate("/");
   };
 
   return (
