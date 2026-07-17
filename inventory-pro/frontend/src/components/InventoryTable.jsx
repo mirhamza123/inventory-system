@@ -13,7 +13,10 @@ export default function InventoryTable({ initialProducts }) {
   const normalizeProduct = (product) => ({
     id: product.id || product._id || String(product.sku),
     name: product.name || "",
-    brand: product.brand || product.category || "",
+    brand:
+      product.brand !== undefined && product.brand !== null
+        ? product.brand
+        : product.category || "",
     sku: product.sku || "",
     category: product.category || "",
     price: product.price ?? 0,
@@ -61,7 +64,19 @@ export default function InventoryTable({ initialProducts }) {
         status: updatedProduct.status,
       });
 
-      const updatedItem = normalizeProduct(response.data || updatedProduct);
+      const rawItem = response.data || updatedProduct;
+      const updatedItem = normalizeProduct({
+        ...rawItem,
+        brand:
+          rawItem.brand !== undefined && rawItem.brand !== null
+            ? rawItem.brand
+            : updatedProduct.brand,
+        status:
+          rawItem.status !== undefined && rawItem.status !== null
+            ? rawItem.status
+            : updatedProduct.status,
+      });
+
       setProducts((current) =>
         current.map((item) =>
           item.id === updatedItem.id ? { ...item, ...updatedItem } : item,
