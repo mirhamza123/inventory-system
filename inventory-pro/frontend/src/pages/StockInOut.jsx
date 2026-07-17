@@ -87,7 +87,7 @@ export default function StockInOut() {
 
           <div className="rounded-xl bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold">Recent Logs</h2>
-            <div className="space-y-2">
+            <div className="max-h-[420px] overflow-y-auto space-y-2 pr-1">
               {transactions.map((entry) => (
                 <div
                   key={entry._id}
