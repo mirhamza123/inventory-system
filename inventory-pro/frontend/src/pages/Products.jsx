@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Plus, Truck } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
-import ProductRow from "../components/ProductRow";
+import InventoryTable from "../components/InventoryTable";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import Modal from "../components/Modal";
@@ -162,59 +162,7 @@ export default function Products() {
           </div>
 
           <div className="grid gap-6">
-            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-              <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-                <h3 className="text-sm font-semibold text-slate-700">
-                  Inventory table
-                </h3>
-                <span className="text-xs text-slate-500">
-                  Showing {products.length} products
-                </span>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="text-left text-[11px] font-bold uppercase tracking-wide text-slate-400">
-                      <th className="px-5 py-3">Product</th>
-                      <th className="px-5 py-3">SKU/Code</th>
-                      <th className="px-5 py-3">Category</th>
-                      <th className="px-5 py-3">Price</th>
-                      <th className="px-5 py-3">Quantity</th>
-                      <th className="px-5 py-3">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {loading ? (
-                      <tr>
-                        <td
-                          colSpan="6"
-                          className="px-5 py-6 text-center text-sm text-slate-500"
-                        >
-                          Loading products...
-                        </td>
-                      </tr>
-                    ) : products.length === 0 ? (
-                      <tr>
-                        <td
-                          colSpan="6"
-                          className="px-5 py-6 text-center text-sm text-slate-500"
-                        >
-                          No products found yet.
-                        </td>
-                      </tr>
-                    ) : (
-                      products.map((product) => (
-                        <ProductRow
-                          key={product._id || product.sku}
-                          product={product}
-                        />
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <InventoryTable initialProducts={products} />
           </div>
 
           <Modal

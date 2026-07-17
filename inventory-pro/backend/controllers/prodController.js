@@ -12,7 +12,7 @@ export const getProducts = async (_req, res) => {
 
 export const addProduct = async (req, res) => {
   try {
-    const { name, sku, price, quantity, category } = req.body;
+    const { name, brand, sku, price, quantity, category, status } = req.body;
 
     if (!name || !sku || price === undefined || quantity === undefined) {
       return res
@@ -22,10 +22,12 @@ export const addProduct = async (req, res) => {
 
     const product = await Product.create({
       name,
+      brand,
       sku,
       price,
       quantity,
       category,
+      status,
     });
     res.status(201).json(product);
   } catch (error) {
