@@ -44,6 +44,12 @@ export const updateProduct = async (req, res) => {
 
     if (req.body.name !== undefined) product.name = req.body.name;
     if (req.body.brand !== undefined) product.brand = req.body.brand;
+    if (req.body.sku !== undefined) product.sku = req.body.sku;
+    if (req.body.price !== undefined) product.price = Number(req.body.price);
+    if (req.body.quantity !== undefined) {
+      product.quantity = Number(req.body.quantity);
+    }
+    if (req.body.category !== undefined) product.category = req.body.category;
     if (req.body.status !== undefined) product.status = req.body.status;
 
     await product.save();

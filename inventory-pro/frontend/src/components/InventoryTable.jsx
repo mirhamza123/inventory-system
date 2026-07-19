@@ -71,6 +71,7 @@ export default function InventoryTable({ initialProducts, onProductsChange }) {
       const response = await api.put(`/products/${updatedProduct.id}`, {
         name: updatedProduct.name,
         brand: updatedProduct.brand,
+        price: Number(updatedProduct.price),
         status: updatedProduct.status,
       });
 
@@ -81,18 +82,26 @@ export default function InventoryTable({ initialProducts, onProductsChange }) {
           rawItem.brand !== undefined && rawItem.brand !== null
             ? rawItem.brand
             : updatedProduct.brand,
+        price:
+          rawItem.price !== undefined && rawItem.price !== null
+            ? rawItem.price
+            : updatedProduct.price,
         status:
           rawItem.status !== undefined && rawItem.status !== null
             ? rawItem.status
             : updatedProduct.status,
       });
 
-      const updatedProducts = products.map((item) =>
-        item.id === updatedItem.id ? { ...item, ...updatedItem } : item,
-      );
+      setProducts((prevProducts) => {
+        const nextProducts = prevProducts.map((item) =>
+          item.id === updatedItem.id ? { ...item, ...updatedItem } : item,
+        );
 
-      setProducts(updatedProducts);
-      onProductsChange?.(updatedProducts.map((item) => ({ ...item })));
+        onProductsChange?.(nextProducts.map((item) => ({ ...item })));
+        return nextProducts;
+      });
+
+      await fetchProducts();
       setIsModalOpen(false);
       setActiveProduct(null);
     } catch (err) {

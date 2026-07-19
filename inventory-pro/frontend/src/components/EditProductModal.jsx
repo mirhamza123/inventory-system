@@ -6,6 +6,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
     id: "",
     name: "",
     brand: "",
+    price: "",
     status: "Available",
   });
 
@@ -15,10 +16,17 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
         id: product.id,
         name: product.name || "",
         brand: product.brand || "",
+        price: product.price ?? "",
         status: product.status || "Available",
       });
     } else {
-      setForm({ id: "", name: "", brand: "", status: "Available" });
+      setForm({
+        id: "",
+        name: "",
+        brand: "",
+        price: "",
+        status: "Available",
+      });
     }
   }, [product]);
 
@@ -30,6 +38,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
       id: form.id,
       name: form.name.trim(),
       brand: form.brand.trim(),
+      price: Number(form.price),
       status: form.status,
     });
   };
@@ -74,6 +83,22 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
               type="text"
               value={form.brand}
               onChange={(e) => setForm({ ...form, brand: e.target.value })}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-700">
+              Price ($)
+            </label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={form.price}
+              onChange={(e) =>
+                setForm({ ...form, price: e.target.value })
+              }
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
             />
           </div>
