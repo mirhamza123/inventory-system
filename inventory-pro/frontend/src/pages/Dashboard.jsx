@@ -142,8 +142,8 @@ export default function Dashboard() {
           </div>
 
           <div className="flex items-center gap-6">
-            <span className="text-[#4a5060] text-lg cursor-pointer">🔔</span>
-            <span className="text-[#4a5060] text-lg cursor-pointer">👤</span>
+            {/* <span className="text-[#4a5060] text-lg cursor-pointer">🔔</span>
+            <span className="text-[#4a5060] text-lg cursor-pointer">👤</span> */}
             <div className="flex items-center gap-3">
               <div>
                 <div className="text-sm font-semibold">Admin User</div>
