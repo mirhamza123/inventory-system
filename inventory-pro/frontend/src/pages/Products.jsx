@@ -53,6 +53,8 @@ export default function Products() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [form, setForm] = useState({
     name: "",
     sku: "",
@@ -63,6 +65,33 @@ export default function Products() {
   const { logout } = useAuth();
 
   const stats = useMemo(() => buildStats(products), [products]);
+
+  const categories = useMemo(() => {
+    const uniqueCategories = Array.from(
+      new Set(products.map((product) => product.category).filter(Boolean)),
+    );
+    return ["All Categories", ...uniqueCategories];
+  }, [products]);
+
+  const filteredProducts = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    return products.filter((product) => {
+      const searchableText = [product.name, product.sku, product.brand]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      const matchesQuery = !query || searchableText.includes(query);
+      const normalizedCategory = String(product.category || "General")
+        .trim()
+        .toLowerCase();
+      const matchesCategory =
+        selectedCategory === "All Categories" ||
+        normalizedCategory === selectedCategory.toLowerCase();
+
+      return matchesQuery && matchesCategory;
+    });
+  }, [products, searchQuery, selectedCategory]);
 
   const fetchProducts = async () => {
     try {
@@ -100,8 +129,15 @@ export default function Products() {
     <div className="flex min-h-screen bg-[#f3f4f2] font-sans text-slate-900">
       <Sidebar onLogout={logout} />
 
-      <div className="flex-1 flex flex-col">
-        <Topbar title="Product inventory" />
+      <div className="flex flex-1 flex-col">
+        <Topbar
+          title="Product inventory"
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          categories={categories}
+        />
 
         <main className="p-8">
           <div className="mb-6 flex items-start justify-between">
@@ -162,7 +198,10 @@ export default function Products() {
           </div>
 
           <div className="grid gap-6">
-            <InventoryTable initialProducts={products} />
+            <InventoryTable
+              initialProducts={filteredProducts}
+              onProductsChange={setProducts}
+            />
           </div>
 
           <Modal

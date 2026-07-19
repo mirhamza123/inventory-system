@@ -3,27 +3,31 @@ import { Pencil } from "lucide-react";
 import api from "../utils/api";
 import EditProductModal from "./EditProductModal";
 
-export default function InventoryTable({ initialProducts }) {
-  const [products, setProducts] = useState([]);
+export default function InventoryTable({ initialProducts, onProductsChange }) {
+  const [products, setProducts] = useState(() =>
+    Array.isArray(initialProducts) ? initialProducts.map(normalizeProduct) : [],
+  );
   const [activeProduct, setActiveProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const normalizeProduct = (product) => ({
-    id: product.id || product._id || String(product.sku),
-    name: product.name || "",
-    brand:
-      product.brand !== undefined && product.brand !== null
-        ? product.brand
-        : product.category || "",
-    sku: product.sku || "",
-    category: product.category || "",
-    price: product.price ?? 0,
-    quantity: product.quantity ?? 0,
-    status:
-      product.status || (product.quantity > 0 ? "Available" : "Unavailable"),
-  });
+  function normalizeProduct(product) {
+    return {
+      id: product.id || product._id || String(product.sku),
+      name: product.name || "",
+      brand:
+        product.brand !== undefined && product.brand !== null
+          ? product.brand
+          : product.category || "",
+      sku: product.sku || "",
+      category: product.category || "",
+      price: product.price ?? 0,
+      quantity: product.quantity ?? 0,
+      status:
+        product.status || (product.quantity > 0 ? "Available" : "Unavailable"),
+    };
+  }
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -35,6 +39,7 @@ export default function InventoryTable({ initialProducts }) {
         ? response.data.map(normalizeProduct)
         : [];
       setProducts(items);
+      onProductsChange?.(response.data || []);
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -46,8 +51,13 @@ export default function InventoryTable({ initialProducts }) {
   };
 
   useEffect(() => {
+    if (Array.isArray(initialProducts)) {
+      setProducts(initialProducts.map(normalizeProduct));
+      return;
+    }
+
     fetchProducts();
-  }, []);
+  }, [initialProducts]);
 
   const handleEdit = (product) => {
     setActiveProduct(product);
@@ -77,11 +87,12 @@ export default function InventoryTable({ initialProducts }) {
             : updatedProduct.status,
       });
 
-      setProducts((current) =>
-        current.map((item) =>
-          item.id === updatedItem.id ? { ...item, ...updatedItem } : item,
-        ),
+      const updatedProducts = products.map((item) =>
+        item.id === updatedItem.id ? { ...item, ...updatedItem } : item,
       );
+
+      setProducts(updatedProducts);
+      onProductsChange?.(updatedProducts.map((item) => ({ ...item })));
       setIsModalOpen(false);
       setActiveProduct(null);
     } catch (err) {
@@ -141,8 +152,7 @@ export default function InventoryTable({ initialProducts }) {
                   colSpan="7"
                   className="px-5 py-12 text-center text-sm text-slate-500"
                 >
-                  No products available. Ensure the backend is running and the
-                  /api/products endpoint is reachable.
+                  No products found
                 </td>
               </tr>
             ) : (
