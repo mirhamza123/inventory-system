@@ -1,15 +1,48 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Search, ChevronDown } from "lucide-react";
 import api from "../utils/api";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../context/AuthContext";
 
 export default function Dashboard() {
   const [activities, setActivities] = useState([]);
+  const [products, setProducts] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [lowStockItems, setLowStockItems] = useState(0);
   const [totalValue, setTotalValue] = useState("$0");
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+
+  const categories = useMemo(() => {
+    const uniqueCategories = Array.from(
+      new Set(products.map((product) => product.category).filter(Boolean)),
+    );
+    return ["All Categories", ...uniqueCategories];
+  }, [products]);
+
+  const filteredActivities = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    return activities.filter((activity) => {
+      const searchableText = [activity.product]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      const matchesQuery = !query || searchableText.includes(query);
+
+      const product = products.find((p) => p.name === activity.product);
+      const normalizedCategory = String(product?.category || "General")
+        .trim()
+        .toLowerCase();
+      const matchesCategory =
+        selectedCategory === "All Categories" ||
+        normalizedCategory === selectedCategory.toLowerCase();
+
+      return matchesQuery && matchesCategory;
+    });
+  }, [activities, searchQuery, selectedCategory, products]);
 
   useEffect(() => {
     let mounted = true;
@@ -27,6 +60,7 @@ export default function Dashboard() {
         const products = productsRes.data || [];
         const transactions = transactionsRes.data || [];
 
+        setProducts(products);
         setTotalItems(products.length);
         setLowStockItems(products.filter((p) => (p.quantity || 0) < 10).length);
         const value = products.reduce(
@@ -80,8 +114,31 @@ export default function Dashboard() {
 
       <div className="flex-1 flex flex-col">
         <header className="h-16 bg-white border-b border-[#e6e6e2] flex items-center justify-between px-6">
-          <div className="search bg-[#f3f4f2] rounded-lg px-3 py-2 w-80 text-sm text-[#8a8f9c] flex items-center">
-            🔍 Search inventory...
+          <div className="flex items-center gap-3 flex-1 max-w-2xl">
+            <label className="flex flex-1 items-center gap-2 rounded-lg bg-[#f3f4f2] px-3.5 py-2 text-sm text-slate-400">
+              <Search size={15} />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search activities..."
+                className="w-full bg-transparent outline-none placeholder:text-slate-400"
+              />
+            </label>
+            <label className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600">
+              <select
+                value={selectedCategory}
+                onChange={(event) => setSelectedCategory(event.target.value)}
+                className="bg-transparent outline-none"
+              >
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+              {/* <ChevronDown size={14} className="pointer-events-none" /> */}
+            </label>
           </div>
 
           <div className="flex items-center gap-6">
@@ -211,8 +268,17 @@ export default function Dashboard() {
                       No recent transactions found
                     </td>
                   </tr>
+                ) : filteredActivities.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="px-5 py-6 text-center text-sm text-[#6b7280]"
+                    >
+                      No activities match your filter
+                    </td>
+                  </tr>
                 ) : (
-                  activities.map((a, i) => (
+                  filteredActivities.map((a, i) => (
                     <tr key={i} className="odd:bg-white even:bg-white">
                       <td className="px-5 py-4 align-top">{a.date}</td>
                       <td className="px-5 py-4 align-top">{a.product}</td>
