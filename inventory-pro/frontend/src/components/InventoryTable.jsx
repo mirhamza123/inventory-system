@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import api from "../utils/api";
 import EditProductModal from "./EditProductModal";
 
@@ -99,6 +99,32 @@ export default function InventoryTable({ initialProducts, onProductsChange }) {
       setError(
         err.response?.data?.message ||
           "Unable to save product changes. Please try again.",
+      );
+    }
+  };
+
+  const handleDeleteProduct = async (productId, productName) => {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete "${productName}"? This action cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    setError("");
+
+    try {
+      await api.delete(`/products/${productId}`);
+
+      const updatedProducts = products.filter((item) => item.id !== productId);
+
+      setProducts(updatedProducts);
+      onProductsChange?.(updatedProducts.map((item) => ({ ...item })));
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Unable to delete product. Please try again.",
       );
     }
   };
@@ -204,7 +230,7 @@ export default function InventoryTable({ initialProducts, onProductsChange }) {
                     <td className="px-5 py-3.5 text-sm font-medium text-slate-700">
                       {product.status}
                     </td>
-                    <td className="px-5 py-3.5">
+                    <td className="px-5 py-3.5 flex items-center gap-3">
                       <button
                         type="button"
                         onClick={() => handleEdit(product)}
@@ -212,6 +238,16 @@ export default function InventoryTable({ initialProducts, onProductsChange }) {
                         aria-label={`Edit ${product.name}`}
                       >
                         <Pencil size={15} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleDeleteProduct(product.id, product.name)
+                        }
+                        className="text-slate-400 transition hover:text-red-600"
+                        aria-label={`Delete ${product.name}`}
+                      >
+                        <Trash2 size={15} />
                       </button>
                     </td>
                   </tr>
