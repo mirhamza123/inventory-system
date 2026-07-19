@@ -1,9 +1,38 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, ChevronDown } from "lucide-react";
+import { Search, ChevronDown, X } from "lucide-react";
 import api from "../utils/api";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../context/AuthContext";
+
+const filterActivitiesByDateRange = (activities, startDate, endDate) => {
+  if (!startDate && !endDate) {
+    return activities;
+  }
+
+  return activities.filter((activity) => {
+    const activityTime = new Date(activity.date);
+
+    if (Number.isNaN(activityTime.getTime())) {
+      return false;
+    }
+
+    const normalizedStart = startDate
+      ? new Date(`${startDate}T00:00:00`)
+      : null;
+    const normalizedEnd = endDate ? new Date(`${endDate}T23:59:59`) : null;
+
+    if (normalizedStart && activityTime < normalizedStart) {
+      return false;
+    }
+
+    if (normalizedEnd && activityTime > normalizedEnd) {
+      return false;
+    }
+
+    return true;
+  });
+};
 
 export default function Dashboard() {
   const [activities, setActivities] = useState([]);
@@ -14,6 +43,9 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const categories = useMemo(() => {
     const uniqueCategories = Array.from(
@@ -43,6 +75,10 @@ export default function Dashboard() {
       return matchesQuery && matchesCategory;
     });
   }, [activities, searchQuery, selectedCategory, products]);
+
+  const historyActivities = useMemo(() => {
+    return filterActivitiesByDateRange(filteredActivities, startDate, endDate);
+  }, [filteredActivities, startDate, endDate]);
 
   useEffect(() => {
     let mounted = true;
@@ -106,6 +142,11 @@ export default function Dashboard() {
       console.error("Logout failed", err);
     }
     navigate("/");
+  };
+
+  const handleClearFilters = () => {
+    setStartDate("");
+    setEndDate("");
   };
 
   return (
@@ -224,9 +265,13 @@ export default function Dashboard() {
           <div className="bg-white rounded-xl border border-[#eceee9] mb-5">
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#eceee9]">
               <h3 className="text-sm font-bold">Recent Stock Activities</h3>
-              <a href="#" className="text-sm text-[#4a5060] font-semibold">
+              <button
+                type="button"
+                onClick={() => setIsHistoryOpen(true)}
+                className="text-sm text-[#4a5060] font-semibold"
+              >
                 View all ›
-              </a>
+              </button>
             </div>
 
             <table className="w-full">
@@ -325,6 +370,124 @@ export default function Dashboard() {
           </div> */}
         </main>
       </div>
+
+      {isHistoryOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
+          <div className="w-full max-w-4xl rounded-2xl border border-[#eceee9] bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#eceee9] px-5 py-4">
+              <div>
+                <h3 className="text-sm font-bold text-slate-800">
+                  Stock Activity History
+                </h3>
+                <p className="mt-1 text-xs text-[#767c8c]">
+                  Filter transactions by date and review the full activity log.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsHistoryOpen(false)}
+                className="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                aria-label="Close history modal"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="border-b border-[#eceee9] bg-[#f9fafb] px-5 py-4">
+              <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                <div className="flex flex-1 flex-col gap-3 md:flex-row">
+                  <label className="flex flex-1 flex-col text-sm font-medium text-slate-600">
+                    <span className="mb-1">Start date</span>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(event) => setStartDate(event.target.value)}
+                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none"
+                    />
+                  </label>
+                  <label className="flex flex-1 flex-col text-sm font-medium text-slate-600">
+                    <span className="mb-1">End date</span>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(event) => setEndDate(event.target.value)}
+                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none"
+                    />
+                  </label>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleClearFilters}
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            </div>
+
+            <div className="max-h-[60vh] overflow-auto px-5 py-4">
+              <table className="w-full min-w-[720px]">
+                <thead>
+                  <tr>
+                    <th className="px-3 py-3 text-left text-xs uppercase tracking-wider text-[#8a8f9c]">
+                      Date &amp; time
+                    </th>
+                    <th className="px-3 py-3 text-left text-xs uppercase tracking-wider text-[#8a8f9c]">
+                      Product
+                    </th>
+                    <th className="px-3 py-3 text-left text-xs uppercase tracking-wider text-[#8a8f9c]">
+                      Action
+                    </th>
+                    <th className="px-3 py-3 text-right text-xs uppercase tracking-wider text-[#8a8f9c]">
+                      Quantity
+                    </th>
+                    <th className="px-3 py-3 text-left text-xs uppercase tracking-wider text-[#8a8f9c]">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {historyActivities.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="px-3 py-8 text-center text-sm text-[#6b7280]"
+                      >
+                        No activities match the selected date range.
+                      </td>
+                    </tr>
+                  ) : (
+                    historyActivities.map((activity, index) => (
+                      <tr
+                        key={`${activity.date}-${index}`}
+                        className="odd:bg-white even:bg-[#f9fafb]"
+                      >
+                        <td className="px-3 py-3 align-top text-sm text-slate-700">
+                          {activity.date}
+                        </td>
+                        <td className="px-3 py-3 align-top text-sm text-slate-700">
+                          {activity.product}
+                        </td>
+                        <td
+                          className={`px-3 py-3 align-top text-sm font-semibold ${activity.dir === "in" ? "text-[#2e9e5b]" : "text-[#d43d3d]"}`}
+                        >
+                          {activity.dir === "in" ? "↘" : "↗"} {activity.action}
+                        </td>
+                        <td className="px-3 py-3 align-top text-right text-sm font-bold text-slate-800">
+                          {activity.qty}
+                        </td>
+                        <td className="px-3 py-3 align-top">
+                          <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#2e9e5b]" />
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
