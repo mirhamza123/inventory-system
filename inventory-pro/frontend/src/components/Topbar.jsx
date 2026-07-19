@@ -36,7 +36,7 @@ export default function Topbar({
               </option>
             ))}
           </select>
-          <ChevronDown size={14} className="pointer-events-none" />
+          {/* <ChevronDown size={14} className="pointer-events-none" /> */}
         </label>
       </div>
 
