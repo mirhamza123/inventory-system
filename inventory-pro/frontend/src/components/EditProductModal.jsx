@@ -96,9 +96,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
               min="0"
               step="0.01"
               value={form.price}
-              onChange={(e) =>
-                setForm({ ...form, price: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, price: e.target.value })}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
             />
           </div>
