@@ -146,10 +146,16 @@ export default function Dashboard() {
     return filterActivitiesByDateRange(filteredActivities, startDate, endDate);
   }, [filteredActivities, startDate, endDate]);
 
-  // Calculate filtered Purchase Orders and Sale Orders based on timeRange
+  // Calculate filtered Purchase Orders and Sale Orders based on timeRange or custom date range
   const { startDate: rangeStart, endDate: rangeEnd } = useMemo(() => {
+    // If custom date range is set, use that; otherwise use timeRange
+    if (startDate && endDate) {
+      const start = new Date(`${startDate}T00:00:00`);
+      const end = new Date(`${endDate}T23:59:59`);
+      return { startDate: start, endDate: end };
+    }
     return getDateRangeForTimeRange(timeRange);
-  }, [timeRange]);
+  }, [timeRange, startDate, endDate]);
 
   const filteredTransactions = useMemo(() => {
     return filterTransactionsByDateRange(transactions, rangeStart, rangeEnd);
@@ -201,6 +207,13 @@ export default function Dashboard() {
       default:
         return "Today";
     }
+  };
+
+  const getActiveFilterLabel = () => {
+    if (startDate && endDate) {
+      return `${startDate} to ${endDate}`;
+    }
+    return getTimeRangeLabel(timeRange);
   };
 
   useEffect(() => {
@@ -357,12 +370,40 @@ export default function Dashboard() {
                 Real-time status of your warehouse inventory.
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <label className="flex items-center gap-2 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 cursor-pointer">
+            <button
+              onClick={() => console.log("Open transaction modal")}
+              className="bg-[#1a2540] text-white rounded-lg px-4 py-2 font-semibold"
+            >
+              + New Stock Entry
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between mb-6 bg-[#f9fafb] border border-[#eceee9] rounded-lg p-4">
+            <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-end md:gap-4">
+              <label className="flex flex-1 flex-col text-sm font-medium text-slate-600 min-w-[150px]">
+                <span className="mb-1 font-semibold">Start date</span>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(event) => setStartDate(event.target.value)}
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200"
+                />
+              </label>
+              <label className="flex flex-1 flex-col text-sm font-medium text-slate-600 min-w-[150px]">
+                <span className="mb-1 font-semibold">End date</span>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(event) => setEndDate(event.target.value)}
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200"
+                />
+              </label>
+              <label className="flex flex-1 flex-col text-sm font-medium text-slate-600 min-w-[150px]">
+                <span className="mb-1 font-semibold">Quick Filter</span>
                 <select
                   value={timeRange}
                   onChange={(event) => setTimeRange(event.target.value)}
-                  className="bg-transparent outline-none font-medium"
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200"
                 >
                   <option value="today">Today</option>
                   <option value="yesterday">Yesterday</option>
@@ -370,18 +411,15 @@ export default function Dashboard() {
                   <option value="lastmonth">Last Month</option>
                   <option value="alltime">All Time</option>
                 </select>
-                <ChevronDown
-                  size={14}
-                  className="pointer-events-none text-slate-400"
-                />
               </label>
-              <button
-                onClick={() => console.log("Open transaction modal")}
-                className="bg-[#1a2540] text-white rounded-lg px-4 py-2 font-semibold"
-              >
-                + New Stock Entry
-              </button>
             </div>
+            <button
+              type="button"
+              onClick={handleClearFilters}
+              className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 whitespace-nowrap"
+            >
+              Clear Filters
+            </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
@@ -446,7 +484,7 @@ export default function Dashboard() {
               </div>
               <div className="text-sm text-[#2e9e5b] mt-2">
                 {filteredStats.poCount} Completed Orders |{" "}
-                {getTimeRangeLabel(timeRange)}
+                {getActiveFilterLabel()}
               </div>
             </div>
 
@@ -464,7 +502,7 @@ export default function Dashboard() {
               </div>
               <div className="text-sm text-[#8a8f9c] mt-2">
                 {filteredStats.soCount} Completed Orders |{" "}
-                {getTimeRangeLabel(timeRange)}
+                {getActiveFilterLabel()}
               </div>
             </div>
           </div>
