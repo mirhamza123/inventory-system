@@ -40,6 +40,10 @@ export default function Dashboard() {
   const [totalItems, setTotalItems] = useState(0);
   const [lowStockItems, setLowStockItems] = useState(0);
   const [totalValue, setTotalValue] = useState("$0");
+  const [totalPurchaseOrders, setTotalPurchaseOrders] = useState(0);
+  const [totalSaleOrders, setTotalSaleOrders] = useState(0);
+  const [poTotalCost, setPoTotalCost] = useState(0);
+  const [soTotalRevenue, setSoTotalRevenue] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
@@ -104,6 +108,32 @@ export default function Dashboard() {
           0,
         );
         setTotalValue(`$${value.toLocaleString()}`);
+
+        // Calculate purchase and sale orders with costs/revenue
+        const purchaseOrders = transactions.filter(
+          (t) => t.type === "stock-in",
+        );
+        const saleOrders = transactions.filter((t) => t.type === "stock-out");
+
+        const poCount = purchaseOrders.length;
+        const soCount = saleOrders.length;
+
+        const poCost = purchaseOrders.reduce((sum, t) => {
+          const price = t.product?.price || 0;
+          const qty = t.quantity || 0;
+          return sum + price * qty;
+        }, 0);
+
+        const soRevenue = saleOrders.reduce((sum, t) => {
+          const price = t.product?.price || 0;
+          const qty = t.quantity || 0;
+          return sum + price * qty;
+        }, 0);
+
+        setTotalPurchaseOrders(poCount);
+        setTotalSaleOrders(soCount);
+        setPoTotalCost(poCost);
+        setSoTotalRevenue(soRevenue);
 
         // Map transactions into the UI-friendly shape
         const mapped = transactions.map((t) => ({
@@ -213,7 +243,7 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 rounded-xl border border-l-green-500">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
             <div className="bg-white rounded-xl border border-[#eceee9] p-5">
               <div className="flex justify-between items-start mb-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#8a8f9c]">
@@ -258,6 +288,40 @@ export default function Dashboard() {
               <div className="text-3xl font-bold">{totalValue}</div>
               <div className="text-sm text-[#8a8f9c] mt-2">
                 🕐 Updated 5 mins ago
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl border border-[#eceee9] p-4 border-l-4 border-l-blue-500">
+              <div className="flex justify-between items-start mb-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#8a8f9c]">
+                  Purchase orders
+                </span>
+                <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                  🛒
+                </div>
+              </div>
+              <div className="text-3xl font-bold">
+                ${poTotalCost.toLocaleString()}
+              </div>
+              <div className="text-sm text-[#2e9e5b] mt-2">
+                {totalPurchaseOrders} Completed Orders | Restock Cost
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl border border-[#eceee9] p-4 border-l-4 border-l-purple-500">
+              <div className="flex justify-between items-start mb-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#8a8f9c]">
+                  Sale orders
+                </span>
+                <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+                  🏷️
+                </div>
+              </div>
+              <div className="text-3xl font-bold">
+                ${soTotalRevenue.toLocaleString()}
+              </div>
+              <div className="text-sm text-[#8a8f9c] mt-2">
+                {totalSaleOrders} Completed Orders | Total Revenue
               </div>
             </div>
           </div>
