@@ -34,9 +34,70 @@ const filterActivitiesByDateRange = (activities, startDate, endDate) => {
   });
 };
 
+const getDateRangeForTimeRange = (range) => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let startDate, endDate;
+
+  switch (range) {
+    case "today":
+      startDate = new Date(today);
+      endDate = new Date(today);
+      endDate.setHours(23, 59, 59, 999);
+      break;
+    case "yesterday":
+      startDate = new Date(today);
+      startDate.setDate(startDate.getDate() - 1);
+      endDate = new Date(startDate);
+      endDate.setHours(23, 59, 59, 999);
+      break;
+    case "last7days":
+      startDate = new Date(today);
+      startDate.setDate(startDate.getDate() - 6);
+      endDate = new Date(today);
+      endDate.setHours(23, 59, 59, 999);
+      break;
+    case "lastmonth":
+      startDate = new Date(today);
+      startDate.setDate(1);
+      startDate.setMonth(startDate.getMonth() - 1);
+      endDate = new Date(today);
+      endDate.setDate(0);
+      endDate.setHours(23, 59, 59, 999);
+      break;
+    case "alltime":
+      startDate = null;
+      endDate = null;
+      break;
+    default:
+      startDate = new Date(today);
+      endDate = new Date(today);
+      endDate.setHours(23, 59, 59, 999);
+  }
+
+  return { startDate, endDate };
+};
+
+const filterTransactionsByDateRange = (transactions, startDate, endDate) => {
+  if (!startDate && !endDate) {
+    return transactions;
+  }
+
+  return transactions.filter((transaction) => {
+    const txnTime = new Date(transaction.createdAt);
+    if (Number.isNaN(txnTime.getTime())) return false;
+
+    if (startDate && txnTime < startDate) return false;
+    if (endDate && txnTime > endDate) return false;
+
+    return true;
+  });
+};
+
 export default function Dashboard() {
   const [activities, setActivities] = useState([]);
   const [products, setProducts] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [lowStockItems, setLowStockItems] = useState(0);
   const [totalValue, setTotalValue] = useState("$0");
@@ -50,6 +111,7 @@ export default function Dashboard() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [timeRange, setTimeRange] = useState("today");
 
   const categories = useMemo(() => {
     const uniqueCategories = Array.from(
@@ -84,6 +146,63 @@ export default function Dashboard() {
     return filterActivitiesByDateRange(filteredActivities, startDate, endDate);
   }, [filteredActivities, startDate, endDate]);
 
+  // Calculate filtered Purchase Orders and Sale Orders based on timeRange
+  const { startDate: rangeStart, endDate: rangeEnd } = useMemo(() => {
+    return getDateRangeForTimeRange(timeRange);
+  }, [timeRange]);
+
+  const filteredTransactions = useMemo(() => {
+    return filterTransactionsByDateRange(transactions, rangeStart, rangeEnd);
+  }, [transactions, rangeStart, rangeEnd]);
+
+  const filteredStats = useMemo(() => {
+    const purchaseOrders = filteredTransactions.filter(
+      (t) => t.type === "stock-in",
+    );
+    const saleOrders = filteredTransactions.filter(
+      (t) => t.type === "stock-out",
+    );
+
+    const poCount = purchaseOrders.length;
+    const soCount = saleOrders.length;
+
+    const poCost = purchaseOrders.reduce((sum, t) => {
+      const price = t.product?.price || 0;
+      const qty = t.quantity || 0;
+      return sum + price * qty;
+    }, 0);
+
+    const soRevenue = saleOrders.reduce((sum, t) => {
+      const price = t.product?.price || 0;
+      const qty = t.quantity || 0;
+      return sum + price * qty;
+    }, 0);
+
+    return {
+      poCount,
+      soCount,
+      poCost,
+      soRevenue,
+    };
+  }, [filteredTransactions]);
+
+  const getTimeRangeLabel = (range) => {
+    switch (range) {
+      case "today":
+        return "Today";
+      case "yesterday":
+        return "Yesterday";
+      case "last7days":
+        return "Last 7 Days";
+      case "lastmonth":
+        return "Last Month";
+      case "alltime":
+        return "All Time";
+      default:
+        return "Today";
+    }
+  };
+
   useEffect(() => {
     let mounted = true;
 
@@ -108,6 +227,9 @@ export default function Dashboard() {
           0,
         );
         setTotalValue(`$${value.toLocaleString()}`);
+
+        // Store transactions for later filtering
+        setTransactions(transactions);
 
         // Calculate purchase and sale orders with costs/revenue
         const purchaseOrders = transactions.filter(
@@ -235,12 +357,31 @@ export default function Dashboard() {
                 Real-time status of your warehouse inventory.
               </p>
             </div>
-            <button
-              onClick={() => console.log("Open transaction modal")}
-              className="bg-[#1a2540] text-white rounded-lg px-4 py-2 font-semibold"
-            >
-              + New Stock Entry
-            </button>
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 cursor-pointer">
+                <select
+                  value={timeRange}
+                  onChange={(event) => setTimeRange(event.target.value)}
+                  className="bg-transparent outline-none font-medium"
+                >
+                  <option value="today">Today</option>
+                  <option value="yesterday">Yesterday</option>
+                  <option value="last7days">Last 7 Days</option>
+                  <option value="lastmonth">Last Month</option>
+                  <option value="alltime">All Time</option>
+                </select>
+                <ChevronDown
+                  size={14}
+                  className="pointer-events-none text-slate-400"
+                />
+              </label>
+              <button
+                onClick={() => console.log("Open transaction modal")}
+                className="bg-[#1a2540] text-white rounded-lg px-4 py-2 font-semibold"
+              >
+                + New Stock Entry
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
@@ -301,10 +442,11 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="text-3xl font-bold">
-                ${poTotalCost.toLocaleString()}
+                ${filteredStats.poCost.toLocaleString()}
               </div>
               <div className="text-sm text-[#2e9e5b] mt-2">
-                {totalPurchaseOrders} Completed Orders | Restock Cost
+                {filteredStats.poCount} Completed Orders |{" "}
+                {getTimeRangeLabel(timeRange)}
               </div>
             </div>
 
@@ -318,10 +460,11 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="text-3xl font-bold">
-                ${soTotalRevenue.toLocaleString()}
+                ${filteredStats.soRevenue.toLocaleString()}
               </div>
               <div className="text-sm text-[#8a8f9c] mt-2">
-                {totalSaleOrders} Completed Orders | Total Revenue
+                {filteredStats.soCount} Completed Orders |{" "}
+                {getTimeRangeLabel(timeRange)}
               </div>
             </div>
           </div>
