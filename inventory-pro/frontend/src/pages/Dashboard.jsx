@@ -105,6 +105,7 @@ export default function Dashboard() {
   const [totalSaleOrders, setTotalSaleOrders] = useState(0);
   const [poTotalCost, setPoTotalCost] = useState(0);
   const [soTotalRevenue, setSoTotalRevenue] = useState(0);
+  const [totalNetProfit, setTotalNetProfit] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
@@ -265,10 +266,20 @@ export default function Dashboard() {
           return sum + price * qty;
         }, 0);
 
+        const netProfit = saleOrders.reduce((sum, t) => {
+          const profit =
+            t.totalProfit ??
+            ((t.sellingPrice || t.product?.price || 0) -
+              (t.product?.purchasePrice || 0)) *
+              (t.quantity || 0);
+          return sum + profit;
+        }, 0);
+
         setTotalPurchaseOrders(poCount);
         setTotalSaleOrders(soCount);
         setPoTotalCost(poCost);
         setSoTotalRevenue(soRevenue);
+        setTotalNetProfit(netProfit);
 
         // Map transactions into the UI-friendly shape
         const mapped = transactions.map((t) => ({
@@ -294,6 +305,19 @@ export default function Dashboard() {
     return () => {
       mounted = false;
     };
+  }, []);
+
+  useEffect(() => {
+    const fetchProfit = async () => {
+      try {
+        const res = await api.get("/stock/profit");
+        setTotalNetProfit(res.data?.totalNetProfit || 0);
+      } catch (error) {
+        console.error("Failed to fetch net profit:", error);
+      }
+    };
+
+    fetchProfit();
   }, []);
 
   const navigate = useNavigate();
@@ -422,7 +446,7 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
             <div className="bg-white rounded-xl border border-[#eceee9] p-5">
               <div className="flex justify-between items-start mb-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#8a8f9c]">
@@ -450,6 +474,23 @@ export default function Dashboard() {
               <div className="text-3xl font-bold">{totalValue}</div>
               <div className="text-sm text-[#8a8f9c] mt-2">
                 🕐 Updated 5 mins ago
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl border border-[#eceee9] p-4 border-l-yellow-500">
+              <div className="flex justify-between items-start mb-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#8a8f9c]">
+                  Total net profit
+                </span>
+                <div className="w-8 h-8 rounded-lg bg-yellow-50 text-yellow-600 flex items-center justify-center">
+                  📈
+                </div>
+              </div>
+              <div className="text-3xl font-bold">
+                ${totalNetProfit.toLocaleString()}
+              </div>
+              <div className="text-sm text-[#8a8f9c] mt-2">
+                Net profit from sales
               </div>
             </div>
 

@@ -22,7 +22,10 @@ export default function InventoryTable({ initialProducts, onProductsChange }) {
           : product.category || "",
       sku: product.sku || "",
       category: product.category || "",
-      price: product.price ?? 0,
+      purchasePrice: product.purchasePrice ?? 0,
+      retailPrice: product.retailPrice ?? product.price ?? 0,
+      wholesalePrice: product.wholesalePrice ?? 0,
+      price: product.price ?? product.retailPrice ?? 0,
       quantity: product.quantity ?? 0,
       status:
         product.status || (product.quantity > 0 ? "Available" : "Unavailable"),
@@ -71,7 +74,9 @@ export default function InventoryTable({ initialProducts, onProductsChange }) {
       const response = await api.put(`/products/${updatedProduct.id}`, {
         name: updatedProduct.name,
         brand: updatedProduct.brand,
-        price: Number(updatedProduct.price),
+        purchasePrice: Number(updatedProduct.purchasePrice),
+        retailPrice: Number(updatedProduct.retailPrice),
+        wholesalePrice: Number(updatedProduct.wholesalePrice),
         status: updatedProduct.status,
       });
 
@@ -82,10 +87,23 @@ export default function InventoryTable({ initialProducts, onProductsChange }) {
           rawItem.brand !== undefined && rawItem.brand !== null
             ? rawItem.brand
             : updatedProduct.brand,
+        purchasePrice:
+          rawItem.purchasePrice !== undefined && rawItem.purchasePrice !== null
+            ? rawItem.purchasePrice
+            : updatedProduct.purchasePrice,
+        retailPrice:
+          rawItem.retailPrice !== undefined && rawItem.retailPrice !== null
+            ? rawItem.retailPrice
+            : updatedProduct.retailPrice,
+        wholesalePrice:
+          rawItem.wholesalePrice !== undefined &&
+          rawItem.wholesalePrice !== null
+            ? rawItem.wholesalePrice
+            : updatedProduct.wholesalePrice,
         price:
           rawItem.price !== undefined && rawItem.price !== null
             ? rawItem.price
-            : updatedProduct.price,
+            : (updatedProduct.retailPrice ?? updatedProduct.price),
         status:
           rawItem.status !== undefined && rawItem.status !== null
             ? rawItem.status

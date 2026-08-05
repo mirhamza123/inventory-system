@@ -10,6 +10,7 @@ export default function StockInOut() {
   const [form, setForm] = useState({
     productId: "",
     type: "stock-in",
+    saleType: "Retail",
     quantity: "",
     reason: "",
   });
@@ -30,8 +31,18 @@ export default function StockInOut() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await api.post("/stock", { ...form, quantity: Number(form.quantity) });
-    setForm({ productId: "", type: "stock-in", quantity: "", reason: "" });
+    await api.post("/stock", {
+      ...form,
+      quantity: Number(form.quantity),
+      saleType: form.type === "stock-out" ? form.saleType : undefined,
+    });
+    setForm({
+      productId: "",
+      type: "stock-in",
+      saleType: "Retail",
+      quantity: "",
+      reason: "",
+    });
     fetchData();
   };
 
@@ -66,6 +77,18 @@ export default function StockInOut() {
                 <option value="stock-in">Stock In</option>
                 <option value="stock-out">Stock Out</option>
               </select>
+              {form.type === "stock-out" && (
+                <select
+                  className="w-full rounded border p-3"
+                  value={form.saleType}
+                  onChange={(e) =>
+                    setForm({ ...form, saleType: e.target.value })
+                  }
+                >
+                  <option value="Retail">Retail</option>
+                  <option value="Wholesale">Wholesale</option>
+                </select>
+              )}
               <input
                 className="w-full rounded border p-3"
                 type="number"

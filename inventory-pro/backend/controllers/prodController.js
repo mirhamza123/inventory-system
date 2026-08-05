@@ -12,9 +12,26 @@ export const getProducts = async (_req, res) => {
 
 export const addProduct = async (req, res) => {
   try {
-    const { name, brand, sku, price, quantity, category, status } = req.body;
+    const {
+      name,
+      brand,
+      sku,
+      purchasePrice,
+      retailPrice,
+      wholesalePrice,
+      quantity,
+      category,
+      status,
+    } = req.body;
 
-    if (!name || !sku || price === undefined || quantity === undefined) {
+    if (
+      !name ||
+      !sku ||
+      purchasePrice === undefined ||
+      retailPrice === undefined ||
+      wholesalePrice === undefined ||
+      quantity === undefined
+    ) {
       return res
         .status(400)
         .json({ message: "Missing required product fields" });
@@ -24,8 +41,11 @@ export const addProduct = async (req, res) => {
       name,
       brand,
       sku,
-      price,
-      quantity,
+      purchasePrice: Number(purchasePrice),
+      retailPrice: Number(retailPrice),
+      wholesalePrice: Number(wholesalePrice),
+      price: Number(retailPrice),
+      quantity: Number(quantity),
       category,
       status,
     });
@@ -45,7 +65,14 @@ export const updateProduct = async (req, res) => {
     if (req.body.name !== undefined) product.name = req.body.name;
     if (req.body.brand !== undefined) product.brand = req.body.brand;
     if (req.body.sku !== undefined) product.sku = req.body.sku;
-    if (req.body.price !== undefined) product.price = Number(req.body.price);
+    if (req.body.purchasePrice !== undefined)
+      product.purchasePrice = Number(req.body.purchasePrice);
+    if (req.body.retailPrice !== undefined) {
+      product.retailPrice = Number(req.body.retailPrice);
+      product.price = Number(req.body.retailPrice);
+    }
+    if (req.body.wholesalePrice !== undefined)
+      product.wholesalePrice = Number(req.body.wholesalePrice);
     if (req.body.quantity !== undefined) {
       product.quantity = Number(req.body.quantity);
     }

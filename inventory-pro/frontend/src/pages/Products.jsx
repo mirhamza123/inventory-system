@@ -58,7 +58,9 @@ export default function Products() {
   const [form, setForm] = useState({
     name: "",
     sku: "",
-    price: "",
+    purchasePrice: "",
+    retailPrice: "",
+    wholesalePrice: "",
     quantity: "",
     category: "",
   });
@@ -115,10 +117,20 @@ export default function Products() {
     try {
       await api.post("/products", {
         ...form,
-        price: Number(form.price),
+        purchasePrice: Number(form.purchasePrice),
+        retailPrice: Number(form.retailPrice),
+        wholesalePrice: Number(form.wholesalePrice),
         quantity: Number(form.quantity),
       });
-      setForm({ name: "", sku: "", price: "", quantity: "", category: "" });
+      setForm({
+        name: "",
+        sku: "",
+        purchasePrice: "",
+        retailPrice: "",
+        wholesalePrice: "",
+        quantity: "",
+        category: "",
+      });
       await fetchProducts();
     } catch (error) {
       alert(error.response?.data?.message || "Unable to add product");
@@ -237,9 +249,29 @@ export default function Products() {
               <input
                 className="w-full rounded border border-slate-200 p-3 text-sm"
                 type="number"
-                placeholder="Price"
-                value={form.price}
-                onChange={(e) => setForm({ ...form, price: e.target.value })}
+                placeholder="Purchase Price"
+                value={form.purchasePrice}
+                onChange={(e) =>
+                  setForm({ ...form, purchasePrice: e.target.value })
+                }
+              />
+              <input
+                className="w-full rounded border border-slate-200 p-3 text-sm"
+                type="number"
+                placeholder="Retail Price"
+                value={form.retailPrice}
+                onChange={(e) =>
+                  setForm({ ...form, retailPrice: e.target.value })
+                }
+              />
+              <input
+                className="w-full rounded border border-slate-200 p-3 text-sm"
+                type="number"
+                placeholder="Wholesale Price"
+                value={form.wholesalePrice}
+                onChange={(e) =>
+                  setForm({ ...form, wholesalePrice: e.target.value })
+                }
               />
               <input
                 className="w-full rounded border border-slate-200 p-3 text-sm"
