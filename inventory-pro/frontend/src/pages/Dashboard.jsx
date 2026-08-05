@@ -112,6 +112,7 @@ export default function Dashboard() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [showAllHistory, setShowAllHistory] = useState(false);
   const [timeRange, setTimeRange] = useState("today");
 
   const categories = useMemo(() => {
@@ -144,8 +145,11 @@ export default function Dashboard() {
   }, [activities, searchQuery, selectedCategory, products]);
 
   const historyActivities = useMemo(() => {
+    if (showAllHistory) {
+      return filteredActivities;
+    }
     return filterActivitiesByDateRange(filteredActivities, startDate, endDate);
-  }, [filteredActivities, startDate, endDate]);
+  }, [filteredActivities, startDate, endDate, showAllHistory]);
 
   // Calculate filtered Purchase Orders and Sale Orders based on timeRange or custom date range
   const { startDate: rangeStart, endDate: rangeEnd } = useMemo(() => {
@@ -336,6 +340,7 @@ export default function Dashboard() {
   const handleClearFilters = () => {
     setStartDate("");
     setEndDate("");
+    setShowAllHistory(false);
   };
 
   return (
@@ -671,7 +676,8 @@ export default function Dashboard() {
                       type="date"
                       value={startDate}
                       onChange={(event) => setStartDate(event.target.value)}
-                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none"
+                      disabled={showAllHistory}
+                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none disabled:cursor-not-allowed disabled:bg-slate-100"
                     />
                   </label>
                   <label className="flex flex-1 flex-col text-sm font-medium text-slate-600">
@@ -680,17 +686,32 @@ export default function Dashboard() {
                       type="date"
                       value={endDate}
                       onChange={(event) => setEndDate(event.target.value)}
-                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none"
+                      disabled={showAllHistory}
+                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none disabled:cursor-not-allowed disabled:bg-slate-100"
                     />
                   </label>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleClearFilters}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-                >
-                  Clear Filters
-                </button>
+
+                <div className="flex items-center gap-3">
+                  <label className="inline-flex items-center gap-2 text-sm font-medium text-slate-600">
+                    <input
+                      type="checkbox"
+                      checked={showAllHistory}
+                      onChange={(event) =>
+                        setShowAllHistory(event.target.checked)
+                      }
+                      className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                    />
+                    Show all history
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleClearFilters}
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                  >
+                    Clear Filters
+                  </button>
+                </div>
               </div>
             </div>
 
