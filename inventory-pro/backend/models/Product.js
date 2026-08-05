@@ -17,6 +17,7 @@ const productSchema = new mongoose.Schema(
       enum: ["Available", "Unavailable"],
       default: "Available",
     },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

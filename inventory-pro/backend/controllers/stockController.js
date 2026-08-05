@@ -62,6 +62,8 @@ export const createTransaction = async (req, res) => {
 
     const transaction = await Transaction.create({
       product: productId,
+      productName: product.name,
+      purchasePrice: product.purchasePrice || 0,
       type,
       quantity,
       reason,
@@ -100,8 +102,10 @@ export const getTotalNetProfit = async (req, res) => {
     const totalNetProfit = transactions.reduce((sum, transaction) => {
       const profit =
         transaction.totalProfit ??
-        ((transaction.sellingPrice || transaction.product?.price || 0) -
-          (transaction.product?.purchasePrice || 0)) *
+        ((transaction.sellingPrice || 0) -
+          (transaction.purchasePrice ||
+            transaction.product?.purchasePrice ||
+            0)) *
           (transaction.quantity || 0);
       return sum + profit;
     }, 0);

@@ -3,7 +3,9 @@ import Transaction from "../models/Transaction.js";
 
 export const getProducts = async (_req, res) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 });
+    const products = await Product.find({ isDeleted: false }).sort({
+      createdAt: -1,
+    });
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -89,12 +91,15 @@ export const updateProduct = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { isDeleted: true },
+      { new: true },
+    );
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    await Transaction.deleteMany({ product: req.params.id });
     res.json({ message: "Product deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
