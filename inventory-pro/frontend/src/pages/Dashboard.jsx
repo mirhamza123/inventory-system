@@ -422,7 +422,7 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             <div className="bg-white rounded-xl border border-[#eceee9] p-5">
               <div className="flex justify-between items-start mb-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#8a8f9c]">
@@ -435,23 +435,6 @@ export default function Dashboard() {
               <div className="text-3xl font-bold">{totalItems}</div>
               <div className="text-sm text-[#2e9e5b] mt-2">
                 ↗ +4.2% from last month
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl border border-[#eceee9] p-4 border-l-red-500">
-              <div className="flex justify-between items-start mb-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#8a8f9c]">
-                  Low stock items
-                </span>
-                <div className="w-8 h-8 rounded-lg bg-[#fbe6e6] text-[#d43d3d] flex items-center justify-center">
-                  ⚠
-                </div>
-              </div>
-              <div className="text-3xl font-bold text-[#d43d3d]">
-                {lowStockItems}
-              </div>
-              <div className="text-sm text-[#d43d3d] font-semibold mt-2">
-                ! Requires immediate restock
               </div>
             </div>
 
