@@ -12,7 +12,6 @@ const navItems = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutGrid },
   { label: "Products", to: "/products", icon: FileText },
   { label: "Stock In/Out", to: "/stock", icon: Repeat },
-  { label: "Alerts", to: "/alerts", icon: Bell },
 ];
 
 export default function Sidebar({ onLogout }) {

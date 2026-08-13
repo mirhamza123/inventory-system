@@ -48,14 +48,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/alerts"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
+      {/* Alerts route removed - no separate Alerts page */}
     </Routes>
   );
 }
