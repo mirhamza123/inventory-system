@@ -57,14 +57,11 @@ const getDateRangeForTimeRange = (range) => {
       endDate = new Date(today);
       endDate.setHours(23, 59, 59, 999);
       break;
-    case "lastmonth":
-      startDate = new Date(today);
-      startDate.setDate(1);
-      startDate.setMonth(startDate.getMonth() - 1);
-      endDate = new Date(today);
-      endDate.setDate(0);
-      endDate.setHours(23, 59, 59, 999);
+    case "lastmonth": {
+      startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      endDate = new Date(today.getFullYear(), today.getMonth(), 0, 23, 59, 59, 999);
       break;
+    }
     case "alltime":
       startDate = null;
       endDate = null;
@@ -83,12 +80,15 @@ const filterTransactionsByDateRange = (transactions, startDate, endDate) => {
     return transactions;
   }
 
+  const normalizedStart = startDate ? new Date(startDate) : null;
+  const normalizedEnd = endDate ? new Date(endDate) : null;
+
   return transactions.filter((transaction) => {
     const txnTime = new Date(transaction.createdAt);
     if (Number.isNaN(txnTime.getTime())) return false;
 
-    if (startDate && txnTime < startDate) return false;
-    if (endDate && txnTime > endDate) return false;
+    if (normalizedStart && txnTime < normalizedStart) return false;
+    if (normalizedEnd && txnTime > normalizedEnd) return false;
 
     return true;
   });
@@ -101,11 +101,6 @@ export default function Dashboard() {
   const [totalItems, setTotalItems] = useState(0);
   const [lowStockItems, setLowStockItems] = useState(0);
   const [totalValue, setTotalValue] = useState("$0");
-  const [totalPurchaseOrders, setTotalPurchaseOrders] = useState(0);
-  const [totalSaleOrders, setTotalSaleOrders] = useState(0);
-  const [poTotalCost, setPoTotalCost] = useState(0);
-  const [soTotalRevenue, setSoTotalRevenue] = useState(0);
-  const [totalNetProfit, setTotalNetProfit] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
@@ -151,20 +146,23 @@ export default function Dashboard() {
     return filterActivitiesByDateRange(filteredActivities, startDate, endDate);
   }, [filteredActivities, startDate, endDate, showAllHistory]);
 
-  // Calculate filtered Purchase Orders and Sale Orders based on timeRange or custom date range
-  const { startDate: rangeStart, endDate: rangeEnd } = useMemo(() => {
-    // If custom date range is set, use that; otherwise use timeRange
+  const activeDateRange = useMemo(() => {
     if (startDate && endDate) {
       const start = new Date(`${startDate}T00:00:00`);
       const end = new Date(`${endDate}T23:59:59`);
       return { startDate: start, endDate: end };
     }
+
     return getDateRangeForTimeRange(timeRange);
   }, [timeRange, startDate, endDate]);
 
   const filteredTransactions = useMemo(() => {
-    return filterTransactionsByDateRange(transactions, rangeStart, rangeEnd);
-  }, [transactions, rangeStart, rangeEnd]);
+    return filterTransactionsByDateRange(
+      transactions,
+      activeDateRange.startDate,
+      activeDateRange.endDate,
+    );
+  }, [transactions, activeDateRange]);
 
   const filteredStats = useMemo(() => {
     const purchaseOrders = filteredTransactions.filter(
@@ -178,15 +176,25 @@ export default function Dashboard() {
     const soCount = saleOrders.length;
 
     const poCost = purchaseOrders.reduce((sum, t) => {
-      const price = t.product?.price || 0;
-      const qty = t.quantity || 0;
-      return sum + price * qty;
+      const value = Number(t.product?.purchasePrice || t.product?.price || 0);
+      const qty = Number(t.quantity || 0);
+      return sum + value * qty;
     }, 0);
 
     const soRevenue = saleOrders.reduce((sum, t) => {
-      const price = t.product?.price || 0;
-      const qty = t.quantity || 0;
-      return sum + price * qty;
+      const value = Number(
+        t.sellingPrice ?? t.product?.retailPrice ?? t.product?.price ?? 0,
+      );
+      const qty = Number(t.quantity || 0);
+      return sum + value * qty;
+    }, 0);
+
+    const netProfit = saleOrders.reduce((sum, t) => {
+      const profit =
+        Number(t.totalProfit ?? 0) ||
+        ((Number(t.sellingPrice ?? t.product?.retailPrice ?? t.product?.price ?? 0) -
+          Number(t.product?.purchasePrice ?? 0)) * Number(t.quantity || 0));
+      return sum + profit;
     }, 0);
 
     return {
@@ -194,6 +202,7 @@ export default function Dashboard() {
       soCount,
       poCost,
       soRevenue,
+      netProfit,
     };
   }, [filteredTransactions]);
 
@@ -249,42 +258,6 @@ export default function Dashboard() {
         // Store transactions for later filtering
         setTransactions(transactions);
 
-        // Calculate purchase and sale orders with costs/revenue
-        const purchaseOrders = transactions.filter(
-          (t) => t.type === "stock-in",
-        );
-        const saleOrders = transactions.filter((t) => t.type === "stock-out");
-
-        const poCount = purchaseOrders.length;
-        const soCount = saleOrders.length;
-
-        const poCost = purchaseOrders.reduce((sum, t) => {
-          const price = t.product?.price || 0;
-          const qty = t.quantity || 0;
-          return sum + price * qty;
-        }, 0);
-
-        const soRevenue = saleOrders.reduce((sum, t) => {
-          const price = t.product?.price || 0;
-          const qty = t.quantity || 0;
-          return sum + price * qty;
-        }, 0);
-
-        const netProfit = saleOrders.reduce((sum, t) => {
-          const profit =
-            t.totalProfit ??
-            ((t.sellingPrice || t.product?.price || 0) -
-              (t.product?.purchasePrice || 0)) *
-              (t.quantity || 0);
-          return sum + profit;
-        }, 0);
-
-        setTotalPurchaseOrders(poCount);
-        setTotalSaleOrders(soCount);
-        setPoTotalCost(poCost);
-        setSoTotalRevenue(soRevenue);
-        setTotalNetProfit(netProfit);
-
         // Map transactions into the UI-friendly shape
         const mapped = transactions.map((t) => ({
           date: new Date(t.createdAt).toLocaleString(),
@@ -309,19 +282,6 @@ export default function Dashboard() {
     return () => {
       mounted = false;
     };
-  }, []);
-
-  useEffect(() => {
-    const fetchProfit = async () => {
-      try {
-        const res = await api.get("/stock/profit");
-        setTotalNetProfit(res.data?.totalNetProfit || 0);
-      } catch (error) {
-        console.error("Failed to fetch net profit:", error);
-      }
-    };
-
-    fetchProfit();
   }, []);
 
   const navigate = useNavigate();
@@ -444,7 +404,12 @@ export default function Dashboard() {
             </div>
             <button
               type="button"
-              onClick={handleClearFilters}
+              onClick={() => {
+                setStartDate("");
+                setEndDate("");
+                setTimeRange("alltime");
+                setShowAllHistory(false);
+              }}
               className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 whitespace-nowrap"
             >
               Clear Filters
@@ -492,7 +457,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="text-3xl font-bold">
-                ${totalNetProfit.toLocaleString()}
+                ${filteredStats.netProfit.toLocaleString()}
               </div>
               <div className="text-sm text-[#8a8f9c] mt-2">
                 Net profit from sales
