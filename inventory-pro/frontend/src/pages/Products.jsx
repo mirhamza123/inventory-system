@@ -63,6 +63,7 @@ export default function Products() {
     wholesalePrice: "",
     quantity: "",
     category: "",
+    expiryDate: "",
   });
   const { logout } = useAuth();
 
@@ -121,6 +122,7 @@ export default function Products() {
         retailPrice: Number(form.retailPrice),
         wholesalePrice: Number(form.wholesalePrice),
         quantity: Number(form.quantity),
+        expiryDate: form.expiryDate || null,
       });
       setForm({
         name: "",
@@ -130,6 +132,7 @@ export default function Products() {
         wholesalePrice: "",
         quantity: "",
         category: "",
+        expiryDate: "",
       });
       await fetchProducts();
     } catch (error) {
@@ -279,6 +282,14 @@ export default function Products() {
                 placeholder="Quantity"
                 value={form.quantity}
                 onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+              />
+              <input
+                className="w-full rounded border border-slate-200 p-3 text-sm"
+                type="date"
+                value={form.expiryDate}
+                onChange={(e) =>
+                  setForm({ ...form, expiryDate: e.target.value })
+                }
               />
               <div className="flex items-center gap-2">
                 <button

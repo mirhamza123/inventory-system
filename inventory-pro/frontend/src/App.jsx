@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import AlertsPage from "./pages/AlertsPage";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Products from "./pages/Products";
@@ -48,7 +49,14 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      {/* Alerts route removed - no separate Alerts page */}
+      <Route
+        path="/alerts"
+        element={
+          <ProtectedRoute>
+            <AlertsPage />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

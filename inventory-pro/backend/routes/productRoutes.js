@@ -2,6 +2,7 @@ import express from "express";
 import {
   addProduct,
   deleteProduct,
+  getProductAlerts,
   getProducts,
   updateProduct,
 } from "../controllers/prodController.js";
@@ -9,6 +10,7 @@ import protect from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+router.get("/alerts", protect, getProductAlerts);
 router.get("/", protect, getProducts);
 router.post("/", protect, addProduct);
 router.put("/:id", protect, updateProduct);

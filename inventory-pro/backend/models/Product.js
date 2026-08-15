@@ -11,6 +11,7 @@ const productSchema = new mongoose.Schema(
     price: { type: Number, min: 0, default: 0 },
     quantity: { type: Number, required: true, min: 0, default: 0 },
     category: { type: String, trim: true, default: "General" },
+    expiryDate: { type: Date, required: false, default: null },
     status: {
       type: String,
       trim: true,

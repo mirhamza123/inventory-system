@@ -9,11 +9,16 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
     purchasePrice: "",
     retailPrice: "",
     wholesalePrice: "",
+    expiryDate: "",
     status: "Available",
   });
 
   useEffect(() => {
     if (product) {
+      const expiryDateValue = product.expiryDate
+        ? new Date(product.expiryDate).toISOString().split("T")[0]
+        : "";
+
       setForm({
         id: product.id,
         name: product.name || "",
@@ -21,6 +26,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
         purchasePrice: product.purchasePrice ?? "",
         retailPrice: product.retailPrice ?? "",
         wholesalePrice: product.wholesalePrice ?? "",
+        expiryDate: expiryDateValue,
         status: product.status || "Available",
       });
     } else {
@@ -31,6 +37,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
         purchasePrice: "",
         retailPrice: "",
         wholesalePrice: "",
+        expiryDate: "",
         status: "Available",
       });
     }
@@ -47,6 +54,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
       purchasePrice: Number(form.purchasePrice),
       retailPrice: Number(form.retailPrice),
       wholesalePrice: Number(form.wholesalePrice),
+      expiryDate: form.expiryDate || null,
       status: form.status,
     });
   };
@@ -139,6 +147,18 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
               onChange={(e) =>
                 setForm({ ...form, wholesalePrice: e.target.value })
               }
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-700">
+              Expiry Date
+            </label>
+            <input
+              type="date"
+              value={form.expiryDate}
+              onChange={(e) => setForm({ ...form, expiryDate: e.target.value })}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
             />
           </div>
