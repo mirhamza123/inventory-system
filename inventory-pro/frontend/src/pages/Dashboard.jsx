@@ -59,7 +59,15 @@ const getDateRangeForTimeRange = (range) => {
       break;
     case "lastmonth": {
       startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-      endDate = new Date(today.getFullYear(), today.getMonth(), 0, 23, 59, 59, 999);
+      endDate = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        0,
+        23,
+        59,
+        59,
+        999,
+      );
       break;
     }
     case "alltime":
@@ -192,8 +200,11 @@ export default function Dashboard() {
     const netProfit = saleOrders.reduce((sum, t) => {
       const profit =
         Number(t.totalProfit ?? 0) ||
-        ((Number(t.sellingPrice ?? t.product?.retailPrice ?? t.product?.price ?? 0) -
-          Number(t.product?.purchasePrice ?? 0)) * Number(t.quantity || 0));
+        (Number(
+          t.sellingPrice ?? t.product?.retailPrice ?? t.product?.price ?? 0,
+        ) -
+          Number(t.product?.purchasePrice ?? 0)) *
+          Number(t.quantity || 0);
       return sum + profit;
     }, 0);
 
