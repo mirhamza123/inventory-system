@@ -13,3 +13,7 @@ const connectDB = async () => {
 };
 
 export default connectDB;
+// PORT=5000
+// MONGO_URI=mongodb://127.0.0.1:27017/inventory-pro
+// JWT_SECRET=inventory-pro-secret-key
+// # discout  option  add
