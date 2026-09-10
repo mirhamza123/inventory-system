@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Production Build
+dist/
+**/dist/
+build/
+
+# Secrets & Env
+.env
+.env.*
+
+# Logs & System Files
+*.log
+npm-debug.log*
+.DS_Store
