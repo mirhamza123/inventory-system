@@ -66,7 +66,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
         onClick={onClose}
       />
 
-      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
+      <div className="relative z-10 flex max-h-[calc(100vh-3rem)] w-full max-w-md flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
         <div className="flex items-center justify-between bg-[#1a2540] px-5 py-4">
           <h2 className="text-lg font-semibold text-white">Edit Product</h2>
           <button
@@ -78,7 +78,10 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 px-5 py-6">
+        <form
+          onSubmit={handleSubmit}
+          className="min-h-0 space-y-4 overflow-y-auto px-5 py-6"
+        >
           <div>
             <label className="mb-2 block text-sm font-medium text-slate-700">
               Product Name
