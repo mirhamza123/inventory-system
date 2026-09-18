@@ -61,9 +61,11 @@ export default function Settings() {
     setForm((current) => ({ ...current, [field]: event.target.value }));
 
   return (
-    <div className="flex min-h-screen bg-[#f3f4f2] font-sans text-slate-900">
-      <Sidebar onLogout={logout} />
-      <div className="flex flex-1 flex-col">
+    <div className="flex h-screen w-screen overflow-hidden bg-[#f3f4f2] font-sans text-slate-900">
+      <div className="h-screen flex-shrink-0 overflow-hidden">
+        <Sidebar onLogout={logout} />
+      </div>
+      <div className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto">
         <Topbar title="General settings" />
         <main className="p-8">
           <div className="mb-6">
