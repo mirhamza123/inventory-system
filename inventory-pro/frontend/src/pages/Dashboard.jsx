@@ -315,10 +315,12 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#f3f4f2] text-[#1a2332]">
-      <Sidebar onLogout={handleLogout} />
+    <div className="flex h-screen w-screen overflow-hidden bg-[#f3f4f2] text-[#1a2332]">
+      <div className="h-screen flex-shrink-0 overflow-hidden">
+        <Sidebar onLogout={handleLogout} />
+      </div>
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto">
         <header className="h-16 bg-white border-b border-[#e6e6e2] flex items-center justify-between px-6">
           <div className="flex items-center gap-3 flex-1 max-w-2xl">
             <label className="flex flex-1 items-center gap-2 rounded-lg bg-[#f3f4f2] px-3.5 py-2 text-sm text-slate-400">
