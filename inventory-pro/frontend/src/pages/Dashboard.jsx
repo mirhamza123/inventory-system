@@ -437,8 +437,8 @@ export default function Dashboard() {
                   ▦
                 </div>
               </div>
-              <div className="text-3xl font-bold">{totalItems}</div>
-              <div className="text-sm text-[#2e9e5b] mt-2">
+              <div className="text-2xl font-bold">{totalItems}</div>
+              <div className="text-[12px] text-[#2e9e5b] mt-1">
                 ↗ +4.2% from last month
               </div>
             </div>
@@ -452,8 +452,8 @@ export default function Dashboard() {
                   💰
                 </div>
               </div>
-              <div className="text-3xl font-bold">{totalValue}</div>
-              <div className="text-sm text-[#8a8f9c] mt-2">
+              <div className="text-2xl font-bold">{totalValue}</div>
+              <div className="text-[12px] text-[#8a8f9c] mt-1">
                 🕐 Updated 5 mins ago
               </div>
             </div>
@@ -467,10 +467,10 @@ export default function Dashboard() {
                   📈
                 </div>
               </div>
-              <div className="text-3xl font-bold">
+              <div className="text-2xl font-bold">
                 ${filteredStats.netProfit.toLocaleString()}
               </div>
-              <div className="text-sm text-[#8a8f9c] mt-2">
+              <div className="text-[12px] text-[#8a8f9c] mt-1">
                 Net profit from sales
               </div>
             </div>
@@ -484,10 +484,10 @@ export default function Dashboard() {
                   🛒
                 </div>
               </div>
-              <div className="text-3xl font-bold">
+              <div className="text-2xl font-bold">
                 ${filteredStats.poCost.toLocaleString()}
               </div>
-              <div className="text-sm text-[#2e9e5b] mt-2">
+              <div className="text-[12px] text-[#2e9e5b] mt-1">
                 {filteredStats.poCount} Completed Orders |{" "}
                 {getActiveFilterLabel()}
               </div>
@@ -502,10 +502,10 @@ export default function Dashboard() {
                   🏷️
                 </div>
               </div>
-              <div className="text-3xl font-bold">
+              <div className="text-2xl font-bold">
                 ${filteredStats.soRevenue.toLocaleString()}
               </div>
-              <div className="text-sm text-[#8a8f9c] mt-2">
+              <div className="text-[12px] text-[#8a8f9c] mt-1">
                 {filteredStats.soCount} Completed Orders |{" "}
                 {getActiveFilterLabel()}
               </div>
