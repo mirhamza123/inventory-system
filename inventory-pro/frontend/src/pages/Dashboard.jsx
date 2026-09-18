@@ -365,8 +365,8 @@ export default function Dashboard() {
         <main className="p-7">
           <div className="flex items-start justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-bold">Dashboard Overview</h2>
-              <p className="text-sm text-[#767c8c] mt-1">
+              <h2 className="text-[18px] font-bold">Dashboard Overview</h2>
+              <p className="text-sm text-[#767c8c] ">
                 Real-time status of your warehouse inventory.
               </p>
             </div>
