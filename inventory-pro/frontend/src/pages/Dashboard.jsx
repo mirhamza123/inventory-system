@@ -429,8 +429,8 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
             <div className="bg-white rounded-xl border border-[#eceee9] p-5">
-              <div className="flex justify-between items-start mb-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#8a8f9c]">
+              <div className="flex justify-between items-start mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#8a8f9c]">
                   Total items
                 </span>
                 <div className="w-8 h-8 rounded-lg bg-[#e8ecfb] text-[#3d54d4] flex items-center justify-center">
@@ -444,8 +444,8 @@ export default function Dashboard() {
             </div>
 
             <div className="bg-white rounded-xl border border-[#eceee9] p-4 border-l-green-900">
-              <div className="flex justify-between items-start mb-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#8a8f9c]">
+              <div className="flex justify-between items-start mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#8a8f9c]">
                   Total stock value
                 </span>
                 <div className="w-8 h-8 rounded-lg bg-[#e8ecfb] text-[#3d54d4] flex items-center justify-center">
@@ -459,8 +459,8 @@ export default function Dashboard() {
             </div>
 
             <div className="bg-white rounded-xl border border-[#eceee9] p-4 border-l-yellow-500">
-              <div className="flex justify-between items-start mb-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#8a8f9c]">
+              <div className="flex justify-between items-start mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#8a8f9c]">
                   Total net profit
                 </span>
                 <div className="w-8 h-8 rounded-lg bg-yellow-50 text-yellow-600 flex items-center justify-center">
@@ -476,8 +476,8 @@ export default function Dashboard() {
             </div>
 
             <div className="bg-white rounded-xl border border-[#eceee9] p-4 border-l-4 border-l-blue-500">
-              <div className="flex justify-between items-start mb-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#8a8f9c]">
+              <div className="flex justify-between items-start mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#8a8f9c]">
                   Purchase orders
                 </span>
                 <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
@@ -494,8 +494,8 @@ export default function Dashboard() {
             </div>
 
             <div className="bg-white rounded-xl border border-[#eceee9] p-4 border-l-4 border-l-purple-500">
-              <div className="flex justify-between items-start mb-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#8a8f9c]">
+              <div className="flex justify-between items-start mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#8a8f9c]">
                   Sale orders
                 </span>
                 <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
