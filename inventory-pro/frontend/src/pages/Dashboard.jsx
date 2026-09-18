@@ -363,7 +363,7 @@ export default function Dashboard() {
         </header>
 
         <main className="p-7">
-          <div className="flex items-start justify-between mb-6">
+          <div className="flex items-start justify-between mb-4">
             <div>
               <h2 className="text-[18px] font-bold">Dashboard Overview</h2>
               <p className="text-sm text-[#767c8c] ">
@@ -372,7 +372,7 @@ export default function Dashboard() {
             </div>
             <button
               onClick={() => console.log("Open transaction modal")}
-              className="bg-[#1a2540] text-white rounded-lg px-4 py-2 font-semibold"
+              className="bg-[#1a2540] text-white rounded-lg px-2 py-2 font-semibold"
             >
               + New Stock Entry
             </button>
