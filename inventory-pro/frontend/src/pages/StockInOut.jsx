@@ -52,7 +52,7 @@ export default function StockInOut() {
       <div className="h-screen flex-shrink-0 overflow-hidden">
         <Sidebar onLogout={logout} />
       </div>
-      <main className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto p-6">
+      <main className="flex h-full min-w-0 flex-1 flex-col overflow-hidden p-6">
         <div className="flex items-center justify-between">
           <Topbar title="Stock Movement" />
           <button
