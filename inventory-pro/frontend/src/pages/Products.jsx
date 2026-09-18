@@ -6,6 +6,7 @@ import InventoryTable from "../components/InventoryTable";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import Modal from "../components/Modal";
+import { exportStockReport } from "../utils/exportReports";
 
 const buildStats = (products) => {
   const totalUnits = products.reduce(
@@ -162,14 +163,23 @@ export default function Products() {
                 Manage and track your warehouse stock levels in real time.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => setShowModal(true)}
-              className="flex items-center gap-1.5 rounded-lg bg-[#1a2540] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#253258]"
-            >
-              <Plus size={15} />
-              Add new product
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => exportStockReport(products)}
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Export stock
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowModal(true)}
+                className="flex items-center gap-1.5 rounded-lg bg-[#1a2540] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#253258]"
+              >
+                <Plus size={15} />
+                Add new product
+              </button>
+            </div>
           </div>
 
           <div className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">

@@ -5,6 +5,8 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import stockRoutes from "./routes/stockRoutes.js";
+import settingsRoutes from "./routes/settingsRoutes.js";
+import salesRoutes from "./routes/salesRoutes.js";
 
 dotenv.config();
 
@@ -22,6 +24,8 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/stock", stockRoutes);
+app.use("/api/settings", settingsRoutes);
+app.use("/api/sales", salesRoutes);
 
 const startServer = (port = Number(process.env.PORT) || 5000, attempt = 1) => {
   const server = app.listen(port, () => {

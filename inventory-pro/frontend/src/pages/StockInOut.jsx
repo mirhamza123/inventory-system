@@ -3,6 +3,7 @@ import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
+import { exportSalesReport } from "../utils/exportReports";
 
 export default function StockInOut() {
   const [products, setProducts] = useState([]);
@@ -50,7 +51,16 @@ export default function StockInOut() {
     <div className="flex min-h-screen bg-slate-100">
       <Sidebar onLogout={logout} />
       <main className="flex-1 p-6">
-        <Topbar title="Stock Movement" />
+        <div className="flex items-center justify-between">
+          <Topbar title="Stock Movement" />
+          <button
+            type="button"
+            onClick={() => exportSalesReport(transactions)}
+            className="mr-6 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Export sales
+          </button>
+        </div>
         <div className="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="rounded-xl bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold">Stock Form</h2>

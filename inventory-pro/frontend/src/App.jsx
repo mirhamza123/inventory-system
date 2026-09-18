@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import Products from "./pages/Products";
 import Register from "./pages/Register";
 import StockInOut from "./pages/StockInOut";
+import Settings from "./pages/Settings";
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
@@ -54,6 +55,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <AlertsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <Settings />
           </ProtectedRoute>
         }
       />
