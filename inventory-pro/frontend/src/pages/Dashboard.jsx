@@ -378,7 +378,7 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between mb-6 bg-[#f9fafb] border border-[#eceee9] rounded-lg p-4">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between mb-4 bg-[#f9fafb] border border-[#eceee9] rounded-lg p-4">
             <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-end md:gap-4">
               <label className="flex flex-1 flex-col text-sm font-medium text-slate-600 min-w-[150px]">
                 <span className="mb-1 font-semibold">Start date</span>
@@ -427,8 +427,8 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
-            <div className="bg-white rounded-xl border border-[#eceee9] p-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 mb-5">
+            <div className="bg-white rounded-xl border border-[#f7f8f6]  border-l-green-900 p-5">
               <div className="flex justify-between items-start mb-1">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#8a8f9c]">
                   Total items
@@ -475,7 +475,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border border-[#eceee9] p-4 border-l-4 border-l-blue-500">
+            <div className="bg-white rounded-xl border border-[#eceee9] p-4  border-l-blue-500">
               <div className="flex justify-between items-start mb-1">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#8a8f9c]">
                   Purchase orders
@@ -493,7 +493,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border border-[#eceee9] p-4 border-l-4 border-l-purple-500">
+            <div className="bg-white rounded-xl border border-[#eceee9] p-4 border-l-purple-500">
               <div className="flex justify-between items-start mb-1">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#8a8f9c]">
                   Sale orders
