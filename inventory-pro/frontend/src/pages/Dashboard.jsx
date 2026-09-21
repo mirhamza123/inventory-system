@@ -314,6 +314,22 @@ export default function Dashboard() {
     setShowAllHistory(false);
   };
 
+  useEffect(() => {
+    if (!isHistoryOpen) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsHistoryOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isHistoryOpen]);
+
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#f3f4f2] text-[#1a2332]">
       <div className="h-screen flex-shrink-0 overflow-hidden">
@@ -624,8 +640,14 @@ export default function Dashboard() {
       </div>
 
       {isHistoryOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
-          <div className="w-full max-w-4xl rounded-2xl border border-[#eceee9] bg-white shadow-2xl">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6"
+          onClick={() => setIsHistoryOpen(false)}
+        >
+          <div
+            className="w-full max-w-4xl rounded-2xl border border-[#eceee9] bg-white shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-[#eceee9] px-5 py-4">
               <div>
                 <h3 className="text-sm font-bold text-slate-800">
