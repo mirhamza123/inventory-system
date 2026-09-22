@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { X } from "lucide-react";
 
 export default function Modal({ open, title, onClose, children }) {
   useEffect(() => {
@@ -17,25 +18,22 @@ export default function Modal({ open, title, onClose, children }) {
       aria-modal="true"
       className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto px-3 py-6"
     >
-      <div className="fixed inset-0 bg-black/40" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative z-10 w-full max-w-lg max-h-[calc(100vh-3rem)] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b px-4 py-3">
-          <h3 className="font-semibold text-slate-800">{title}</h3>
-        </div>
-
-        <div className="max-h-[calc(100vh-10rem)] overflow-y-auto p-5">
-          {children}
-        </div>
-
-        <div className="flex justify-end gap-2 border-t px-4 py-3">
+      <div className="relative z-10 w-full max-w-xl max-h-[calc(100vh-3rem)] overflow-hidden rounded-3xl bg-white shadow-2xl">
+        <div className="flex items-center justify-between bg-[#1a2540] px-5 py-4">
+          <h2 className="text-xl font-semibold text-white">{title}</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded bg-slate-100 px-3 py-2 text-sm text-slate-700 hover:bg-slate-200"
+            className="text-slate-200 transition hover:text-white"
           >
-            Close
+            <X size={22} />
           </button>
+        </div>
+
+        <div className="max-h-[calc(100vh-8rem)] overflow-y-auto px-5 py-6">
+          {children}
         </div>
       </div>
     </div>
