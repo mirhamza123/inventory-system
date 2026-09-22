@@ -14,7 +14,14 @@ export const getTransactions = async (_req, res) => {
 
 export const createTransaction = async (req, res) => {
   try {
-    const { productId, type, quantity, reason, saleType } = req.body;
+    const {
+      productId,
+      type,
+      quantity,
+      reason,
+      saleType,
+      discount = 0,
+    } = req.body;
 
     if (!productId || !type || quantity === undefined) {
       return res.status(400).json({ message: "Missing transaction fields" });
@@ -40,6 +47,8 @@ export const createTransaction = async (req, res) => {
       unitProfit: 0,
       totalProfit: 0,
       saleType: undefined,
+      discount: 0,
+      finalAmount: 0,
     };
 
     if (type === "stock-out") {
@@ -49,6 +58,10 @@ export const createTransaction = async (req, res) => {
         resolvedSaleType === "Wholesale"
           ? product.wholesalePrice || product.price
           : product.retailPrice || product.price;
+      const normalizedDiscount = Math.max(0, Number(discount) || 0);
+      const grossRevenue = Number(sellingPrice || 0) * Number(quantity || 0);
+      const safeDiscount = Math.min(normalizedDiscount, grossRevenue);
+      const finalAmount = Math.max(grossRevenue - safeDiscount, 0);
       const unitProfit = sellingPrice - (product.purchasePrice || 0);
       const totalProfit = unitProfit * quantity;
 
@@ -57,6 +70,8 @@ export const createTransaction = async (req, res) => {
         sellingPrice,
         unitProfit,
         totalProfit,
+        discount: safeDiscount,
+        finalAmount,
       };
     }
 
@@ -100,14 +115,18 @@ export const getTotalNetProfit = async (req, res) => {
 
     const transactions = await Transaction.find(filter).populate("product");
     const totalNetProfit = transactions.reduce((sum, transaction) => {
-      const profit =
+      const baseProfit =
         transaction.totalProfit ??
         ((transaction.sellingPrice || 0) -
           (transaction.purchasePrice ||
             transaction.product?.purchasePrice ||
             0)) *
           (transaction.quantity || 0);
-      return sum + profit;
+      const adjustedProfit = Math.max(
+        (Number(baseProfit) || 0) - (Number(transaction.discount) || 0),
+        0,
+      );
+      return sum + adjustedProfit;
     }, 0);
 
     res.json({ totalNetProfit });

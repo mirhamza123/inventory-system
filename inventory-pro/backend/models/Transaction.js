@@ -9,6 +9,8 @@ const transactionSchema = new mongoose.Schema(
     productName: { type: String, trim: true, default: "" },
     unitProfit: { type: Number, default: 0 },
     totalProfit: { type: Number, default: 0 },
+    discount: { type: Number, min: 0, default: 0 },
+    finalAmount: { type: Number, min: 0, default: 0 },
     quantity: { type: Number, required: true, min: 1 },
     reason: { type: String, trim: true, default: "Manual entry" },
     product: {
