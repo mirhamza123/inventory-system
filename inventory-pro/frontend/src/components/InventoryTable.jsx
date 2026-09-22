@@ -72,60 +72,40 @@ export default function InventoryTable({ initialProducts, onProductsChange }) {
     setError("");
 
     try {
-      const response = await api.put(`/products/${updatedProduct.id}`, {
+      const payload = {
         name: updatedProduct.name,
         brand: updatedProduct.brand,
-        purchasePrice: Number(updatedProduct.purchasePrice),
-        retailPrice: Number(updatedProduct.retailPrice),
-        wholesalePrice: Number(updatedProduct.wholesalePrice),
+        purchasePrice: Number(updatedProduct.purchasePrice || 0),
+        retailPrice: Number(updatedProduct.retailPrice || 0),
+        wholesalePrice: Number(updatedProduct.wholesalePrice || 0),
         expiryDate: updatedProduct.expiryDate || null,
         status: updatedProduct.status,
-      });
+      };
 
-      const rawItem = response.data || updatedProduct;
-      const updatedItem = normalizeProduct({
-        ...rawItem,
-        brand:
-          rawItem.brand !== undefined && rawItem.brand !== null
-            ? rawItem.brand
-            : updatedProduct.brand,
+      const response = await api.put(`/products/${updatedProduct.id}`, payload);
+      const serverItem = normalizeProduct({
+        ...response.data,
+        ...updatedProduct,
         purchasePrice:
-          rawItem.purchasePrice !== undefined && rawItem.purchasePrice !== null
-            ? rawItem.purchasePrice
-            : updatedProduct.purchasePrice,
-        retailPrice:
-          rawItem.retailPrice !== undefined && rawItem.retailPrice !== null
-            ? rawItem.retailPrice
-            : updatedProduct.retailPrice,
+          response.data?.purchasePrice ?? updatedProduct.purchasePrice,
+        retailPrice: response.data?.retailPrice ?? updatedProduct.retailPrice,
         wholesalePrice:
-          rawItem.wholesalePrice !== undefined &&
-          rawItem.wholesalePrice !== null
-            ? rawItem.wholesalePrice
-            : updatedProduct.wholesalePrice,
+          response.data?.wholesalePrice ?? updatedProduct.wholesalePrice,
         price:
-          rawItem.price !== undefined && rawItem.price !== null
-            ? rawItem.price
-            : (updatedProduct.retailPrice ?? updatedProduct.price),
-        status:
-          rawItem.status !== undefined && rawItem.status !== null
-            ? rawItem.status
-            : updatedProduct.status,
-        expiryDate:
-          rawItem.expiryDate !== undefined && rawItem.expiryDate !== null
-            ? rawItem.expiryDate
-            : updatedProduct.expiryDate,
+          response.data?.price ??
+          response.data?.retailPrice ??
+          updatedProduct.retailPrice,
       });
 
       setProducts((prevProducts) => {
         const nextProducts = prevProducts.map((item) =>
-          item.id === updatedItem.id ? { ...item, ...updatedItem } : item,
+          item.id === serverItem.id ? serverItem : item,
         );
 
         onProductsChange?.(nextProducts.map((item) => ({ ...item })));
         return nextProducts;
       });
 
-      await fetchProducts();
       setIsModalOpen(false);
       setActiveProduct(null);
     } catch (err) {

@@ -45,15 +45,20 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
 
   if (!isOpen) return null;
 
+  const handleFieldChange = (field) => (event) => {
+    const value = event.target.value;
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave?.({
       id: form.id,
       name: form.name.trim(),
       brand: form.brand.trim(),
-      purchasePrice: Number(form.purchasePrice),
-      retailPrice: Number(form.retailPrice),
-      wholesalePrice: Number(form.wholesalePrice),
+      purchasePrice: Number(form.purchasePrice || 0),
+      retailPrice: Number(form.retailPrice || 0),
+      wholesalePrice: Number(form.wholesalePrice || 0),
       expiryDate: form.expiryDate || null,
       status: form.status,
     });
@@ -115,9 +120,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
               min="0"
               step="0.01"
               value={form.purchasePrice}
-              onChange={(e) =>
-                setForm({ ...form, purchasePrice: e.target.value })
-              }
+              onChange={handleFieldChange("purchasePrice")}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
             />
           </div>
@@ -131,9 +134,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
               min="0"
               step="0.01"
               value={form.retailPrice}
-              onChange={(e) =>
-                setForm({ ...form, retailPrice: e.target.value })
-              }
+              onChange={handleFieldChange("retailPrice")}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
             />
           </div>
@@ -147,9 +148,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
               min="0"
               step="0.01"
               value={form.wholesalePrice}
-              onChange={(e) =>
-                setForm({ ...form, wholesalePrice: e.target.value })
-              }
+              onChange={handleFieldChange("wholesalePrice")}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
             />
           </div>
