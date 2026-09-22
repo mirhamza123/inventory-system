@@ -1,5 +1,24 @@
 import * as XLSX from "xlsx";
 
+const toNumber = (value) => Number(value ?? 0);
+
+const calculateGrossRevenue = (sellingPrice, quantity) =>
+  toNumber(sellingPrice) * toNumber(quantity);
+
+const calculateDiscountAmount = (discount, grossRevenue) => {
+  const value = toNumber(discount);
+  return Math.max(0, Math.min(value, grossRevenue));
+};
+
+const calculateNetRevenue = (grossRevenue, discountAmount) =>
+  Math.max(grossRevenue - discountAmount, 0);
+
+const calculateBaseProfit = (sellingPrice, purchasePrice, quantity) =>
+  (toNumber(sellingPrice) - toNumber(purchasePrice)) * toNumber(quantity);
+
+const calculateAdjustedProfit = (baseProfit, discountAmount) =>
+  Math.max(baseProfit - discountAmount, 0);
+
 const downloadWorkbook = (sheets, fileName) => {
   const workbook = XLSX.utils.book_new();
 
@@ -36,43 +55,61 @@ export const exportSalesReport = (transactions) => {
   const saleRows = transactions
     .filter((transaction) => transaction.type === "stock-out")
     .map((transaction) => {
-      const grossRevenue =
-        Number(transaction.sellingPrice || 0) *
-        Number(transaction.quantity || 0);
-      const discountAmount = Number(transaction.discount || 0);
-      const netRevenue = Math.max(grossRevenue - discountAmount, 0);
-      const adjustedProfit = Math.max(
-        (Number(transaction.totalProfit || 0) || 0) - discountAmount,
-        0,
+      const sellingPrice = toNumber(
+        transaction.sellingPrice ??
+          transaction.product?.retailPrice ??
+          transaction.product?.price ??
+          0,
+      );
+      const quantity = toNumber(transaction.quantity);
+      const purchasePrice = toNumber(
+        transaction.purchasePrice ?? transaction.product?.purchasePrice ?? 0,
+      );
+      const grossRevenue = calculateGrossRevenue(sellingPrice, quantity);
+      const discountAmount = calculateDiscountAmount(
+        transaction.discount,
+        grossRevenue,
+      );
+      const netRevenue = calculateNetRevenue(grossRevenue, discountAmount);
+      const baseProfit = calculateBaseProfit(
+        sellingPrice,
+        purchasePrice,
+        quantity,
+      );
+      const adjustedProfit = calculateAdjustedProfit(
+        baseProfit,
+        discountAmount,
       );
 
       return {
         Date: transaction.createdAt,
         Product: transaction.product?.name || transaction.productName,
-        Quantity: Number(transaction.quantity || 0),
-        SaleType: transaction.saleType || "Retail",
-        SellingPrice: Number(transaction.sellingPrice || 0),
+        Quantity: quantity,
+        "Sale Type": transaction.saleType || "Retail",
+        "Selling Price": sellingPrice,
         "Gross Revenue": grossRevenue,
         "Discount Amount": discountAmount,
         "Net Revenue": netRevenue,
+        "Base Profit": baseProfit,
         "Adjusted Profit": adjustedProfit,
-        Profit: Number(transaction.totalProfit || 0),
       };
     });
 
   const totals = saleRows.reduce(
     (accumulator, row) => {
-      accumulator.grossRevenue += Number(row["Gross Revenue"] || 0);
-      accumulator.totalDiscounts += Number(row["Discount Amount"] || 0);
-      accumulator.netRevenue += Number(row["Net Revenue"] || 0);
-      accumulator.finalProfit += Number(row["Adjusted Profit"] || 0);
+      accumulator.grossRevenue += toNumber(row["Gross Revenue"] || 0);
+      accumulator.totalDiscounts += toNumber(row["Discount Amount"] || 0);
+      accumulator.netRevenue += toNumber(row["Net Revenue"] || 0);
+      accumulator.baseProfit += toNumber(row["Base Profit"] || 0);
+      accumulator.adjustedProfit += toNumber(row["Adjusted Profit"] || 0);
       return accumulator;
     },
     {
       grossRevenue: 0,
       totalDiscounts: 0,
       netRevenue: 0,
-      finalProfit: 0,
+      baseProfit: 0,
+      adjustedProfit: 0,
     },
   );
 
@@ -80,13 +117,13 @@ export const exportSalesReport = (transactions) => {
     Date: "TOTAL",
     Product: "",
     Quantity: "",
-    SaleType: "",
-    SellingPrice: "",
+    "Sale Type": "",
+    "Selling Price": "",
     "Gross Revenue": totals.grossRevenue,
     "Discount Amount": totals.totalDiscounts,
     "Net Revenue": totals.netRevenue,
-    "Adjusted Profit": totals.finalProfit,
-    Profit: totals.finalProfit,
+    "Base Profit": totals.baseProfit,
+    "Adjusted Profit": totals.adjustedProfit,
   };
 
   downloadWorkbook(

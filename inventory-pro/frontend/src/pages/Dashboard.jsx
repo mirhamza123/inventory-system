@@ -190,22 +190,27 @@ export default function Dashboard() {
     }, 0);
 
     const soRevenue = saleOrders.reduce((sum, t) => {
-      const value = Number(
+      const sellingPrice = Number(
         t.sellingPrice ?? t.product?.retailPrice ?? t.product?.price ?? 0,
       );
-      const qty = Number(t.quantity || 0);
-      return sum + value * qty;
+      const quantity = Number(t.quantity || 0);
+      const grossRevenue = sellingPrice * quantity;
+      const discount = Math.min(Number(t.discount || 0), grossRevenue);
+      return sum + Math.max(grossRevenue - discount, 0);
     }, 0);
 
     const netProfit = saleOrders.reduce((sum, t) => {
-      const profit =
-        Number(t.totalProfit ?? 0) ||
-        (Number(
-          t.sellingPrice ?? t.product?.retailPrice ?? t.product?.price ?? 0,
-        ) -
-          Number(t.product?.purchasePrice ?? 0)) *
-          Number(t.quantity || 0);
-      return sum + profit;
+      const sellingPrice = Number(
+        t.sellingPrice ?? t.product?.retailPrice ?? t.product?.price ?? 0,
+      );
+      const purchasePrice = Number(
+        t.product?.purchasePrice ?? t.purchasePrice ?? 0,
+      );
+      const quantity = Number(t.quantity || 0);
+      const grossRevenue = sellingPrice * quantity;
+      const discount = Math.min(Number(t.discount || 0), grossRevenue);
+      const baseProfit = (sellingPrice - purchasePrice) * quantity;
+      return sum + Math.max(baseProfit - discount, 0);
     }, 0);
 
     return {
