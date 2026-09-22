@@ -67,11 +67,11 @@ export default function StockInOut() {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-100">
+    <div className="flex min-h-screen w-full max-w-full overflow-hidden bg-slate-100">
       <div className="h-screen flex-shrink-0 overflow-hidden">
         <Sidebar onLogout={logout} />
       </div>
-      <main className="flex h-full min-w-0 flex-1 flex-col overflow-hidden p-6">
+      <main className="flex min-h-screen min-w-0 flex-1 flex-col overflow-y-auto p-6">
         <div className="flex items-center justify-between gap-4">
           <Topbar title="Stock Movement" />
           <div className="mr-6 flex flex-wrap items-center gap-3">
@@ -105,7 +105,7 @@ export default function StockInOut() {
           </div>
         </div>
         <div className="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-xl bg-white p-6 shadow-sm">
+          <div className="max-h-[calc(100vh-180px)] overflow-y-auto rounded-xl bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold">Stock Form</h2>
             <form onSubmit={handleSubmit} className="space-y-3">
               <select
@@ -196,9 +196,9 @@ export default function StockInOut() {
             </form>
           </div>
 
-          <div className="rounded-xl bg-white p-6 shadow-sm">
+          <div className="max-h-[calc(100vh-180px)] overflow-y-auto rounded-xl bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold">Recent Logs</h2>
-            <div className="max-h-[420px] overflow-y-auto space-y-2 pr-1">
+            <div className="space-y-2 pr-1">
               {transactions.map((entry) => (
                 <div
                   key={entry._id}
