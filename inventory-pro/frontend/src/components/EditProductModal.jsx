@@ -85,7 +85,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
 
         <form
           onSubmit={handleSubmit}
-          className="min-h-0 space-y-4 overflow-y-auto px-5 py-6"
+          className="min-h-0 max-h-[calc(100vh-8rem)] space-y-4 overflow-y-auto px-5 py-6"
         >
           <div>
             <label className="mb-2 block text-sm font-medium text-slate-700">
