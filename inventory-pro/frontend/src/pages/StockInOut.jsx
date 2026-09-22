@@ -8,6 +8,8 @@ import { exportSalesReport } from "../utils/exportReports";
 export default function StockInOut() {
   const [products, setProducts] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [form, setForm] = useState({
     productId: "",
     type: "stock-in",
@@ -70,15 +72,37 @@ export default function StockInOut() {
         <Sidebar onLogout={logout} />
       </div>
       <main className="flex h-full min-w-0 flex-1 flex-col overflow-hidden p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <Topbar title="Stock Movement" />
-          <button
-            type="button"
-            onClick={() => exportSalesReport(transactions)}
-            className="mr-6 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            Export sales
-          </button>
+          <div className="mr-6 flex flex-wrap items-center gap-3">
+            <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+              <span>Start</span>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(event) => setStartDate(event.target.value)}
+                className="bg-transparent outline-none"
+              />
+            </label>
+            <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+              <span>End</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(event) => setEndDate(event.target.value)}
+                className="bg-transparent outline-none"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() =>
+                exportSalesReport(transactions, startDate, endDate)
+              }
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              Export sales
+            </button>
+          </div>
         </div>
         <div className="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="rounded-xl bg-white p-6 shadow-sm">

@@ -30,6 +30,30 @@ const downloadWorkbook = (sheets, fileName) => {
   XLSX.writeFile(workbook, fileName);
 };
 
+const isWithinDateRange = (dateValue, startDate, endDate) => {
+  if (!startDate && !endDate) {
+    return true;
+  }
+
+  const parsedDate = new Date(dateValue);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return false;
+  }
+
+  const normalizedStart = startDate ? new Date(`${startDate}T00:00:00`) : null;
+  const normalizedEnd = endDate ? new Date(`${endDate}T23:59:59.999`) : null;
+
+  if (normalizedStart && parsedDate < normalizedStart) {
+    return false;
+  }
+
+  if (normalizedEnd && parsedDate > normalizedEnd) {
+    return false;
+  }
+
+  return true;
+};
+
 export const exportStockReport = (products) => {
   downloadWorkbook(
     [
@@ -51,9 +75,17 @@ export const exportStockReport = (products) => {
   );
 };
 
-export const exportSalesReport = (transactions) => {
+export const exportSalesReport = (
+  transactions,
+  startDate = "",
+  endDate = "",
+) => {
   const saleRows = transactions
-    .filter((transaction) => transaction.type === "stock-out")
+    .filter(
+      (transaction) =>
+        transaction.type === "stock-out" &&
+        isWithinDateRange(transaction.createdAt, startDate, endDate),
+    )
     .map((transaction) => {
       const sellingPrice = toNumber(
         transaction.sellingPrice ??
