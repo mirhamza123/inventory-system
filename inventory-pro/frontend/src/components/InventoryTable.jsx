@@ -223,7 +223,7 @@ export default function InventoryTable({ initialProducts, onProductsChange }) {
               </tr>
             ) : (
               products.map((product) => {
-                const isLowStock = product.quantity < 10;
+                const isLowStock = Number(product.quantity || 0) < 5;
                 const expiryStatus = getExpiryStatus(product.expiryDate);
                 return (
                   <tr key={product.id} className="border-t border-slate-100">
@@ -257,7 +257,7 @@ export default function InventoryTable({ initialProducts, onProductsChange }) {
                     <td className="px-5 py-3.5">
                       <span
                         className={`inline-flex items-center gap-1.5 text-sm font-medium ${
-                          isLowStock ? "text-red-600" : "text-emerald-600"
+                          isLowStock ? "text-red-600" : "text-slate-700"
                         }`}
                       >
                         <span

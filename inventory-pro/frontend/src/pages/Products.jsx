@@ -14,7 +14,7 @@ const buildStats = (products) => {
     0,
   );
   const lowStockCount = products.filter(
-    (product) => (product.quantity || 0) < 10,
+    (product) => Number(product.quantity || 0) < 5,
   ).length;
   const stockValue = products.reduce(
     (sum, product) =>
