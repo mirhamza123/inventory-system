@@ -1,4 +1,4 @@
-import { Bell, ChevronDown, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
 export default function Topbar({
   title,
@@ -51,12 +51,7 @@ export default function Topbar({
         )}
       </div>
 
-      <div className="flex items-center gap-4">
-        <Bell size={17} className="cursor-pointer text-slate-500" />
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-xs font-bold text-slate-600">
-          AU
-        </div>
-      </div>
+      <div className="flex items-center gap-4" />
     </header>
   );
 }
