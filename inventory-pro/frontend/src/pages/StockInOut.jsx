@@ -111,9 +111,13 @@ export default function StockInOut() {
       quantity: Number(form.quantity),
       saleType: form.type === "stock-out" ? form.saleType : undefined,
       discount: form.type === "stock-out" ? Number(form.discount || 0) : 0,
-      reason: form.reason || (form.type === "stock-out" ? "Stock out" : "Manual entry"),
+      reason:
+        form.reason ||
+        (form.type === "stock-out" ? "Stock out" : "Manual entry"),
       customerName:
-        form.type === "stock-out" ? form.customerName || "Walk-in Customer" : "",
+        form.type === "stock-out"
+          ? form.customerName || "Walk-in Customer"
+          : "",
     };
 
     try {
@@ -123,15 +127,12 @@ export default function StockInOut() {
         const invoiceEntry = {
           id: response?.data?._id || `INV-${Date.now()}`,
           customerName: form.customerName || "Walk-in Customer",
-          productName: selectedProduct?.name || response?.data?.productName || "Product",
+          productName:
+            selectedProduct?.name || response?.data?.productName || "Product",
           quantity: Number(form.quantity || 0),
-          price: Number(
-            response?.data?.sellingPrice ?? unitPrice ?? 0,
-          ),
+          price: Number(response?.data?.sellingPrice ?? unitPrice ?? 0),
           discount: Number(response?.data?.discount ?? form.discount ?? 0),
-          netTotal: Number(
-            response?.data?.finalAmount ?? finalAmount ?? 0,
-          ),
+          netTotal: Number(response?.data?.finalAmount ?? finalAmount ?? 0),
           date: response?.data?.createdAt || new Date().toISOString(),
           type: form.type,
           saleType: form.saleType,
@@ -323,7 +324,6 @@ export default function StockInOut() {
             </div>
           </div>
         </div>
-
       </main>
     </div>
   );

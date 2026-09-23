@@ -47,7 +47,8 @@ export default function InvoicesPage() {
   }, []);
 
   const totalRevenue = useMemo(
-    () => invoices.reduce((sum, invoice) => sum + Number(invoice.netTotal || 0), 0),
+    () =>
+      invoices.reduce((sum, invoice) => sum + Number(invoice.netTotal || 0), 0),
     [invoices],
   );
 
@@ -100,7 +101,8 @@ export default function InvoicesPage() {
         <div className="mt-6 space-y-4">
           {invoices.length === 0 ? (
             <div className="rounded-xl bg-white p-6 text-sm text-slate-500 shadow-sm">
-              No saved invoices yet. Stock out transactions will appear here after saving.
+              No saved invoices yet. Stock out transactions will appear here
+              after saving.
             </div>
           ) : (
             invoices.map((invoice) => (
@@ -117,7 +119,8 @@ export default function InvoicesPage() {
                       {invoice.customerName}
                     </h3>
                     <p className="text-sm text-slate-500">
-                      {invoice.productName} • {invoice.quantity} units • {new Date(invoice.date).toLocaleString()}
+                      {invoice.productName} • {invoice.quantity} units •{" "}
+                      {new Date(invoice.date).toLocaleString()}
                     </p>
                   </div>
 
@@ -149,7 +152,9 @@ export default function InvoicesPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
             <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
               <div className="mb-4 flex items-center justify-between gap-4">
-                <h3 className="text-xl font-bold text-slate-900">Invoice Preview</h3>
+                <h3 className="text-xl font-bold text-slate-900">
+                  Invoice Preview
+                </h3>
                 <button
                   type="button"
                   onClick={() => setSelectedInvoice(null)}
@@ -173,53 +178,142 @@ export default function InvoicesPage() {
                   borderRadius: "16px",
                 }}
               >
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginBottom: "20px",
+                  }}
+                >
                   <div>
-                    <h3 style={{ margin: 0, fontSize: "30px", fontWeight: 700 }}>
+                    <h3
+                      style={{ margin: 0, fontSize: "30px", fontWeight: 700 }}
+                    >
                       {localStorage.getItem("storeName") || "InventoryPro"}
                     </h3>
-                    <p style={{ margin: "8px 0 0", color: "#6b7280", fontSize: "14px" }}>
+                    <p
+                      style={{
+                        margin: "8px 0 0",
+                        color: "#6b7280",
+                        fontSize: "14px",
+                      }}
+                    >
                       Invoice Receipt
                     </p>
                   </div>
-                  <div style={{ textAlign: "right", fontSize: "14px", color: "#6b7280" }}>
+                  <div
+                    style={{
+                      textAlign: "right",
+                      fontSize: "14px",
+                      color: "#6b7280",
+                    }}
+                  >
                     <p style={{ margin: 0 }}>Invoice #{selectedInvoice.id}</p>
-                    <p style={{ margin: "6px 0 0" }}>Date: {new Date(selectedInvoice.date).toLocaleString()}</p>
-                    <p style={{ margin: "6px 0 0" }}>Customer: {selectedInvoice.customerName}</p>
+                    <p style={{ margin: "6px 0 0" }}>
+                      Date: {new Date(selectedInvoice.date).toLocaleString()}
+                    </p>
+                    <p style={{ margin: "6px 0 0" }}>
+                      Customer: {selectedInvoice.customerName}
+                    </p>
                   </div>
                 </div>
 
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    fontSize: "14px",
+                  }}
+                >
                   <thead>
-                    <tr style={{ background: "#f3f4f6", borderBottom: "1px solid #e5e7eb" }}>
-                      <th style={{ textAlign: "left", padding: "10px 8px" }}>Product</th>
-                      <th style={{ textAlign: "left", padding: "10px 8px" }}>Qty</th>
-                      <th style={{ textAlign: "left", padding: "10px 8px" }}>Price</th>
-                      <th style={{ textAlign: "left", padding: "10px 8px" }}>Amount</th>
+                    <tr
+                      style={{
+                        background: "#f3f4f6",
+                        borderBottom: "1px solid #e5e7eb",
+                      }}
+                    >
+                      <th style={{ textAlign: "left", padding: "10px 8px" }}>
+                        Product
+                      </th>
+                      <th style={{ textAlign: "left", padding: "10px 8px" }}>
+                        Qty
+                      </th>
+                      <th style={{ textAlign: "left", padding: "10px 8px" }}>
+                        Price
+                      </th>
+                      <th style={{ textAlign: "left", padding: "10px 8px" }}>
+                        Amount
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr style={{ borderBottom: "1px solid #e5e7eb" }}>
-                      <td style={{ padding: "10px 8px" }}>{selectedInvoice.productName}</td>
-                      <td style={{ padding: "10px 8px" }}>{selectedInvoice.quantity}</td>
-                      <td style={{ padding: "10px 8px" }}>{formatCurrency(selectedInvoice.price, currencySymbol)}</td>
-                      <td style={{ padding: "10px 8px" }}>{formatCurrency(selectedInvoice.netTotal, currencySymbol)}</td>
+                      <td style={{ padding: "10px 8px" }}>
+                        {selectedInvoice.productName}
+                      </td>
+                      <td style={{ padding: "10px 8px" }}>
+                        {selectedInvoice.quantity}
+                      </td>
+                      <td style={{ padding: "10px 8px" }}>
+                        {formatCurrency(selectedInvoice.price, currencySymbol)}
+                      </td>
+                      <td style={{ padding: "10px 8px" }}>
+                        {formatCurrency(
+                          selectedInvoice.netTotal,
+                          currencySymbol,
+                        )}
+                      </td>
                     </tr>
                   </tbody>
                 </table>
 
-                <div style={{ marginTop: "24px", marginLeft: "auto", maxWidth: "320px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "14px" }}>
+                <div
+                  style={{
+                    marginTop: "24px",
+                    marginLeft: "auto",
+                    maxWidth: "320px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginBottom: "8px",
+                      fontSize: "14px",
+                    }}
+                  >
                     <span>Price</span>
-                    <span>{formatCurrency(selectedInvoice.price, currencySymbol)}</span>
+                    <span>
+                      {formatCurrency(selectedInvoice.price, currencySymbol)}
+                    </span>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "14px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginBottom: "8px",
+                      fontSize: "14px",
+                    }}
+                  >
                     <span>Discount</span>
-                    <span>{formatCurrency(selectedInvoice.discount, currencySymbol)}</span>
+                    <span>
+                      {formatCurrency(selectedInvoice.discount, currencySymbol)}
+                    </span>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", paddingTop: "10px", borderTop: "1px solid #e5e7eb", fontWeight: 700, fontSize: "18px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      paddingTop: "10px",
+                      borderTop: "1px solid #e5e7eb",
+                      fontWeight: 700,
+                      fontSize: "18px",
+                    }}
+                  >
                     <span>Net Total</span>
-                    <span>{formatCurrency(selectedInvoice.netTotal, currencySymbol)}</span>
+                    <span>
+                      {formatCurrency(selectedInvoice.netTotal, currencySymbol)}
+                    </span>
                   </div>
                 </div>
               </div>
