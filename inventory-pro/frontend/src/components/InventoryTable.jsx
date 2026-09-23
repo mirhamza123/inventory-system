@@ -4,6 +4,9 @@ import api from "../utils/api";
 import EditProductModal from "./EditProductModal";
 
 export default function InventoryTable({ initialProducts, onProductsChange }) {
+  const [currencySymbol, setCurrencySymbol] = useState(
+    () => localStorage.getItem("currencySymbol") || "$",
+  );
   const [products, setProducts] = useState(() =>
     Array.isArray(initialProducts) ? initialProducts.map(normalizeProduct) : [],
   );
@@ -53,6 +56,19 @@ export default function InventoryTable({ initialProducts, onProductsChange }) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const syncCurrency = () => {
+      setCurrencySymbol(localStorage.getItem("currencySymbol") || "$");
+    };
+
+    syncCurrency();
+    window.addEventListener("storage", syncCurrency);
+
+    return () => {
+      window.removeEventListener("storage", syncCurrency);
+    };
+  }, []);
 
   useEffect(() => {
     if (Array.isArray(initialProducts)) {
@@ -252,7 +268,8 @@ export default function InventoryTable({ initialProducts, onProductsChange }) {
                       </span>
                     </td>
                     <td className="px-5 py-3.5 text-sm font-semibold text-slate-800">
-                      ${product.price}
+                      {currencySymbol}
+                      {product.price}
                     </td>
                     <td className="px-5 py-3.5">
                       <span

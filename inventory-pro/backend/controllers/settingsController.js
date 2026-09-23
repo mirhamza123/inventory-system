@@ -3,9 +3,23 @@ import Setting from "../models/Setting.js";
 const defaultSettings = {
   storeName: "InventoryPro",
   currency: "USD",
+  currencySymbol: "$",
   taxRate: 0,
   address: "",
   logoUrl: "",
+};
+
+const currencySymbols = {
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
+  PKR: "Rs",
+  INR: "₹",
+  AED: "د.إ",
+  SAR: "﷼",
+  JPY: "¥",
+  CAD: "C$",
+  AUD: "A$",
 };
 
 export const getSettings = async (_req, res) => {
@@ -19,12 +33,17 @@ export const getSettings = async (_req, res) => {
 
 export const updateSettings = async (req, res) => {
   try {
-    const { storeName, currency, taxRate, address, logoUrl } = req.body;
+    const { storeName, currency, currencySymbol, taxRate, address, logoUrl } =
+      req.body;
     const parsedTaxRate = Number(taxRate);
+    const normalizedCurrency = (currency || "USD").trim().toUpperCase();
+    const resolvedSymbol =
+      (currencySymbol || currencySymbols[normalizedCurrency] || "$").trim() ||
+      "$";
 
     if (
       !storeName?.trim() ||
-      !currency?.trim() ||
+      !normalizedCurrency ||
       Number.isNaN(parsedTaxRate)
     ) {
       return res
@@ -42,7 +61,8 @@ export const updateSettings = async (req, res) => {
       {},
       {
         storeName: storeName.trim(),
-        currency: currency.trim().toUpperCase(),
+        currency: normalizedCurrency,
+        currencySymbol: resolvedSymbol,
         taxRate: parsedTaxRate,
         address: address?.trim() || "",
         logoUrl: logoUrl?.trim() || "",

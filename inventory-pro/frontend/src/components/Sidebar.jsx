@@ -19,6 +19,22 @@ const navItems = [
 
 export default function Sidebar({ onLogout }) {
   const [alertCount, setAlertCount] = useState(0);
+  const [storeName, setStoreName] = useState(
+    () => localStorage.getItem("storeName") || "InventoryPro",
+  );
+
+  useEffect(() => {
+    const syncStoreName = () => {
+      setStoreName(localStorage.getItem("storeName") || "InventoryPro");
+    };
+
+    syncStoreName();
+    window.addEventListener("storage", syncStoreName);
+
+    return () => {
+      window.removeEventListener("storage", syncStoreName);
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -49,7 +65,7 @@ export default function Sidebar({ onLogout }) {
     <aside className="flex h-screen w-56 flex-col justify-between overflow-hidden bg-[#1a2540] p-5 text-white">
       <div className="flex flex-col">
         <div className="border-b border-white/10 pb-6">
-          <h1 className="text-lg font-bold">InventoryPro</h1>
+          <h1 className="text-lg font-bold">{storeName}</h1>
           <span className="text-xs uppercase tracking-wider text-slate-400">
             Warehouse Admin
           </span>

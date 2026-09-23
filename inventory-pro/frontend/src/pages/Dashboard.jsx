@@ -102,13 +102,30 @@ const filterTransactionsByDateRange = (transactions, startDate, endDate) => {
   });
 };
 
+const formatCurrencyValue = (amount, symbol) => {
+  const normalizedSymbol = String(symbol || "$")
+    .trim()
+    .replace(/\s+/g, "");
+  const safeSymbol =
+    normalizedSymbol.length > 2 && normalizedSymbol.endsWith("$")
+      ? normalizedSymbol.slice(0, -1)
+      : normalizedSymbol;
+
+  return `${safeSymbol}${Number(amount || 0).toLocaleString()}`;
+};
+
 export default function Dashboard() {
   const [activities, setActivities] = useState([]);
   const [products, setProducts] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [lowStockItems, setLowStockItems] = useState(0);
-  const [totalValue, setTotalValue] = useState("$0");
+  const [currencySymbol, setCurrencySymbol] = useState(
+    () => localStorage.getItem("currencySymbol") || "$",
+  );
+  const [totalValue, setTotalValue] = useState(
+    () => `${localStorage.getItem("currencySymbol") || "$"}0`,
+  );
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
@@ -247,6 +264,19 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    const syncCurrency = () => {
+      setCurrencySymbol(localStorage.getItem("currencySymbol") || "$");
+    };
+
+    syncCurrency();
+    window.addEventListener("storage", syncCurrency);
+
+    return () => {
+      window.removeEventListener("storage", syncCurrency);
+    };
+  }, []);
+
+  useEffect(() => {
     let mounted = true;
 
     const fetchData = async () => {
@@ -269,7 +299,9 @@ export default function Dashboard() {
           (sum, p) => sum + (p.price || 0) * (p.quantity || 0),
           0,
         );
-        setTotalValue(`$${value.toLocaleString()}`);
+        const activeCurrency =
+          localStorage.getItem("currencySymbol") || currencySymbol || "$";
+        setTotalValue(formatCurrencyValue(value, activeCurrency));
 
         // Store transactions for later filtering
         setTransactions(transactions);
@@ -454,7 +486,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="text-2xl font-bold">
-                ${filteredStats.netProfit.toLocaleString()}
+                {formatCurrencyValue(filteredStats.netProfit, currencySymbol)}
               </div>
               <div className="text-[12px] text-[#8a8f9c] mt-1">
                 Net profit from sales
@@ -471,7 +503,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="text-2xl font-bold">
-                ${filteredStats.poCost.toLocaleString()}
+                {formatCurrencyValue(filteredStats.poCost, currencySymbol)}
               </div>
               <div className="text-[12px] text-[#2e9e5b] mt-1">
                 {filteredStats.poCount} Completed Orders |{" "}
@@ -489,7 +521,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="text-2xl font-bold">
-                ${filteredStats.soRevenue.toLocaleString()}
+                {formatCurrencyValue(filteredStats.soRevenue, currencySymbol)}
               </div>
               <div className="text-[12px] text-[#8a8f9c] mt-1">
                 {filteredStats.soCount} Completed Orders |{" "}

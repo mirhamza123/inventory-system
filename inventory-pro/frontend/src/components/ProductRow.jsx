@@ -1,7 +1,24 @@
+import { useEffect, useState } from "react";
 import { Pencil } from "lucide-react";
 
 export default function ProductRow({ product }) {
+  const [currencySymbol, setCurrencySymbol] = useState(
+    () => localStorage.getItem("currencySymbol") || "$",
+  );
   const isLowStock = (product.quantity || 0) < 10;
+
+  useEffect(() => {
+    const syncCurrency = () => {
+      setCurrencySymbol(localStorage.getItem("currencySymbol") || "$");
+    };
+
+    syncCurrency();
+    window.addEventListener("storage", syncCurrency);
+
+    return () => {
+      window.removeEventListener("storage", syncCurrency);
+    };
+  }, []);
 
   return (
     <tr className="border-t border-slate-100">
@@ -29,7 +46,8 @@ export default function ProductRow({ product }) {
         </span>
       </td>
       <td className="px-5 py-3.5 text-sm font-semibold text-slate-800">
-        ${product.price}
+        {currencySymbol}
+        {product.price}
       </td>
       <td className="px-5 py-3.5">
         <span

@@ -5,9 +5,23 @@ import Topbar from "../components/Topbar";
 import { useAuth } from "../context/AuthContext";
 import api from "../utils/api";
 
+const currencyOptions = [
+  { code: "USD", symbol: "$" },
+  { code: "EUR", symbol: "€" },
+  { code: "GBP", symbol: "£" },
+  { code: "PKR", symbol: "Rs" },
+  { code: "INR", symbol: "₹" },
+  { code: "AED", symbol: "د.إ" },
+  { code: "SAR", symbol: "﷼" },
+  { code: "JPY", symbol: "¥" },
+  { code: "CAD", symbol: "C$" },
+  { code: "AUD", symbol: "A$" },
+];
+
 const initialForm = {
   storeName: "",
   currency: "USD",
+  currencySymbol: "$",
   taxRate: 0,
   address: "",
   logoUrl: "",
@@ -17,6 +31,18 @@ const initialPasswordForm = {
   currentPassword: "",
   newPassword: "",
   confirmPassword: "",
+};
+
+const getDisplayCurrencySymbol = (symbol) => {
+  const value = String(symbol || "$")
+    .trim()
+    .replace(/\s+/g, "");
+
+  if (value.length > 2 && value.endsWith("$") && /[A-Za-z]/.test(value)) {
+    return value.slice(0, -1);
+  }
+
+  return value;
 };
 
 export default function Settings() {
@@ -37,7 +63,29 @@ export default function Settings() {
     const loadSettings = async () => {
       try {
         const response = await api.get("/settings");
-        setForm({ ...initialForm, ...response.data });
+        const settings = response.data || {};
+        const currencyCode = settings.currency || "USD";
+        const matchedCurrency =
+          currencyOptions.find((option) => option.code === currencyCode) ||
+          currencyOptions[0];
+
+        const nextForm = {
+          ...initialForm,
+          ...settings,
+          currency: currencyCode,
+          currencySymbol: getDisplayCurrencySymbol(
+            settings.currencySymbol || matchedCurrency.symbol,
+          ),
+        };
+
+        setForm(nextForm);
+        localStorage.setItem("storeName", nextForm.storeName || "InventoryPro");
+        localStorage.setItem(
+          "currencySymbol",
+          getDisplayCurrencySymbol(
+            nextForm.currencySymbol || matchedCurrency.symbol,
+          ),
+        );
       } catch (requestError) {
         setError(
           requestError.response?.data?.message || "Unable to load settings",
@@ -57,7 +105,28 @@ export default function Settings() {
     setError("");
 
     try {
-      await api.put("/settings", { ...form, taxRate: Number(form.taxRate) });
+      const normalizedCurrencySymbol = getDisplayCurrencySymbol(
+        form.currencySymbol || "$",
+      );
+
+      const payload = {
+        ...form,
+        currency: form.currency || "USD",
+        currencySymbol: normalizedCurrencySymbol,
+        taxRate: Number(form.taxRate),
+      };
+
+      const response = await api.put("/settings", payload);
+
+      const nextStoreName =
+        response.data?.storeName || form.storeName || "InventoryPro";
+      const nextCurrencySymbol = getDisplayCurrencySymbol(
+        response.data?.currencySymbol || form.currencySymbol || "$",
+      );
+
+      localStorage.setItem("storeName", nextStoreName);
+      localStorage.setItem("currencySymbol", nextCurrencySymbol);
+
       setMessage("Settings saved successfully.");
     } catch (requestError) {
       setError(
@@ -70,6 +139,18 @@ export default function Settings() {
 
   const updateField = (field) => (event) =>
     setForm((current) => ({ ...current, [field]: event.target.value }));
+
+  const handleCurrencyChange = (event) => {
+    const selected =
+      currencyOptions.find((option) => option.code === event.target.value) ||
+      currencyOptions[0];
+
+    setForm((current) => ({
+      ...current,
+      currency: selected.code,
+      currencySymbol: selected.symbol,
+    }));
+  };
 
   const updatePasswordField = (field) => (event) =>
     setPasswordForm((current) => ({
@@ -182,14 +263,19 @@ export default function Settings() {
                     </label>
                     <label className="text-sm font-medium text-slate-700">
                       Currency code
-                      <input
+                      <select
                         required
-                        maxLength={3}
                         disabled={!canEdit}
                         value={form.currency}
-                        onChange={updateField("currency")}
-                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 uppercase outline-none focus:border-slate-400 disabled:bg-slate-100"
-                      />
+                        onChange={handleCurrencyChange}
+                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 outline-none focus:border-slate-400 disabled:bg-slate-100"
+                      >
+                        {currencyOptions.map((option) => (
+                          <option key={option.code} value={option.code}>
+                            {option.code} {option.symbol}
+                          </option>
+                        ))}
+                      </select>
                     </label>
                     <label className="text-sm font-medium text-slate-700">
                       Tax rate (%)

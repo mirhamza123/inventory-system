@@ -6,6 +6,9 @@ import { useAuth } from "../context/AuthContext";
 import { exportSalesReport } from "../utils/exportReports";
 
 export default function StockInOut() {
+  const [currencySymbol, setCurrencySymbol] = useState(
+    () => localStorage.getItem("currencySymbol") || "$",
+  );
   const [products, setProducts] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [startDate, setStartDate] = useState("");
@@ -42,6 +45,19 @@ export default function StockInOut() {
     setProducts(productsRes.data);
     setTransactions(transactionsRes.data);
   };
+
+  useEffect(() => {
+    const syncCurrency = () => {
+      setCurrencySymbol(localStorage.getItem("currencySymbol") || "$");
+    };
+
+    syncCurrency();
+    window.addEventListener("storage", syncCurrency);
+
+    return () => {
+      window.removeEventListener("storage", syncCurrency);
+    };
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -148,7 +164,7 @@ export default function StockInOut() {
                     type="number"
                     min="0"
                     step="0.01"
-                    placeholder="Discount Amount ($)"
+                    placeholder={`Discount Amount (${currencySymbol})`}
                     value={form.discount}
                     onChange={(e) =>
                       setForm({
@@ -177,15 +193,24 @@ export default function StockInOut() {
                 <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
                   <div className="flex items-center justify-between py-1">
                     <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>
+                      {currencySymbol}
+                      {subtotal.toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between py-1 text-red-600">
                     <span>Discount Applied</span>
-                    <span>- ${discountAmount.toFixed(2)}</span>
+                    <span>
+                      - {currencySymbol}
+                      {discountAmount.toFixed(2)}
+                    </span>
                   </div>
                   <div className="mt-2 flex items-center justify-between border-t border-slate-200 pt-2 font-semibold text-slate-900">
                     <span>Net Total / Final Price</span>
-                    <span>${finalAmount.toFixed(2)}</span>
+                    <span>
+                      {currencySymbol}
+                      {finalAmount.toFixed(2)}
+                    </span>
                   </div>
                 </div>
               )}

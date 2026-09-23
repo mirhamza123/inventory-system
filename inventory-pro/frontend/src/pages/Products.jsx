@@ -8,6 +8,8 @@ import { useAuth } from "../context/AuthContext";
 import Modal from "../components/Modal";
 import { exportStockReport } from "../utils/exportReports";
 
+const getCurrencySymbol = () => localStorage.getItem("currencySymbol") || "$";
+
 const buildStats = (products) => {
   const totalUnits = products.reduce(
     (sum, product) => sum + Number(product.quantity || 0),
@@ -21,6 +23,8 @@ const buildStats = (products) => {
       sum + Number(product.price || 0) * Number(product.quantity || 0),
     0,
   );
+
+  const currencySymbol = getCurrencySymbol();
 
   return [
     {
@@ -57,7 +61,7 @@ const buildStats = (products) => {
     },
     {
       label: "Stock Value",
-      value: `$${stockValue.toLocaleString()}`,
+      value: `${currencySymbol}${stockValue.toLocaleString()}`,
       icon: Truck,
       iconColor: "text-slate-400",
       accent: "border-l-[#8a5cf6]",
@@ -70,6 +74,9 @@ const buildStats = (products) => {
 
 export default function Products() {
   const [products, setProducts] = useState([]);
+  const [currencySymbol, setCurrencySymbol] = useState(
+    () => localStorage.getItem("currencySymbol") || "$",
+  );
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -85,6 +92,19 @@ export default function Products() {
     expiryDate: "",
   });
   const { logout } = useAuth();
+
+  useEffect(() => {
+    const syncCurrency = () => {
+      setCurrencySymbol(localStorage.getItem("currencySymbol") || "$");
+    };
+
+    syncCurrency();
+    window.addEventListener("storage", syncCurrency);
+
+    return () => {
+      window.removeEventListener("storage", syncCurrency);
+    };
+  }, []);
 
   const stats = useMemo(() => buildStats(products), [products]);
 
@@ -232,7 +252,7 @@ export default function Products() {
                     <span
                       className={`text-2xl font-bold leading-none ${valueColor || "text-[#1a2332]"}`}
                     >
-                      {value}
+                      {value.replace(/\$/g, currencySymbol)}
                     </span>
                     {tag && (
                       <span
