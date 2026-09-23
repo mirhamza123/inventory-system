@@ -13,12 +13,23 @@ const initialForm = {
   logoUrl: "",
 };
 
+const initialPasswordForm = {
+  currentPassword: "",
+  newPassword: "",
+  confirmPassword: "",
+};
+
 export default function Settings() {
   const [form, setForm] = useState(initialForm);
+  const [passwordForm, setPasswordForm] = useState(initialPasswordForm);
+  const [activeTab, setActiveTab] = useState("general");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [passwordSaving, setPasswordSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const { logout, user } = useAuth();
   const canEdit = user?.role === "admin" || user?.role === "manager";
 
@@ -60,6 +71,51 @@ export default function Settings() {
   const updateField = (field) => (event) =>
     setForm((current) => ({ ...current, [field]: event.target.value }));
 
+  const updatePasswordField = (field) => (event) =>
+    setPasswordForm((current) => ({
+      ...current,
+      [field]: event.target.value,
+    }));
+
+  const handlePasswordSubmit = async (event) => {
+    event.preventDefault();
+    setPasswordError("");
+    setPasswordMessage("");
+
+    if (!passwordForm.currentPassword || !passwordForm.newPassword) {
+      setPasswordError("Please fill in all password fields.");
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError("New password and confirm password do not match.");
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordError("New password must be at least 6 characters long.");
+      return;
+    }
+
+    setPasswordSaving(true);
+
+    try {
+      await api.put("/auth/change-password", {
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+      });
+
+      setPasswordMessage("Password updated successfully.");
+      setPasswordForm(initialPasswordForm);
+    } catch (requestError) {
+      setPasswordError(
+        requestError.response?.data?.message || "Unable to update password.",
+      );
+    } finally {
+      setPasswordSaving(false);
+    }
+  };
+
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#f3f4f2] font-sans text-slate-900">
       <div className="h-screen flex-shrink-0 overflow-hidden">
@@ -69,93 +125,166 @@ export default function Settings() {
         <Topbar title="General settings" />
         <main className="p-8">
           <div className="mb-6">
-            <h2 className="text-xl font-bold">General settings</h2>
+            <h2 className="text-xl font-bold">Settings</h2>
             <p className="mt-1 text-sm text-slate-500">
-              Configure the store details used across your inventory system.
+              Manage your store configuration and account security.
             </p>
           </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="max-w-2xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
-          >
-            {loading ? (
-              <p className="text-sm text-slate-500">Loading settings...</p>
-            ) : (
-              <div className="grid gap-5 md:grid-cols-2">
-                <label className="text-sm font-medium text-slate-700">
-                  Store name
-                  <input
-                    required
-                    disabled={!canEdit}
-                    value={form.storeName}
-                    onChange={updateField("storeName")}
-                    className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 outline-none focus:border-slate-400 disabled:bg-slate-100"
-                  />
-                </label>
-                <label className="text-sm font-medium text-slate-700">
-                  Currency code
-                  <input
-                    required
-                    maxLength={3}
-                    disabled={!canEdit}
-                    value={form.currency}
-                    onChange={updateField("currency")}
-                    className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 uppercase outline-none focus:border-slate-400 disabled:bg-slate-100"
-                  />
-                </label>
-                <label className="text-sm font-medium text-slate-700">
-                  Tax rate (%)
-                  <input
-                    required
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    disabled={!canEdit}
-                    value={form.taxRate}
-                    onChange={updateField("taxRate")}
-                    className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 outline-none focus:border-slate-400 disabled:bg-slate-100"
-                  />
-                </label>
-                <label className="text-sm font-medium text-slate-700">
-                  Logo URL
-                  <input
-                    type="url"
-                    disabled={!canEdit}
-                    value={form.logoUrl}
-                    onChange={updateField("logoUrl")}
-                    className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 outline-none focus:border-slate-400 disabled:bg-slate-100"
-                  />
-                </label>
-                <label className="text-sm font-medium text-slate-700 md:col-span-2">
-                  Store address
-                  <textarea
-                    rows="3"
-                    disabled={!canEdit}
-                    value={form.address}
-                    onChange={updateField("address")}
-                    className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 outline-none focus:border-slate-400 disabled:bg-slate-100"
-                  />
-                </label>
-              </div>
+          <div className="max-w-4xl rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="mb-6 flex flex-wrap gap-2 border-b border-slate-200 pb-3">
+              {[
+                { key: "general", label: "General Settings" },
+                { key: "password", label: "Change Password" },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                    activeTab === tab.key
+                      ? "bg-[#1a2540] text-white shadow-sm"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {activeTab === "general" && (
+              <form onSubmit={handleSubmit}>
+                {loading ? (
+                  <p className="text-sm text-slate-500">Loading settings...</p>
+                ) : (
+                  <div className="grid gap-5 md:grid-cols-2">
+                    <label className="text-sm font-medium text-slate-700">
+                      Store name
+                      <input
+                        required
+                        disabled={!canEdit}
+                        value={form.storeName}
+                        onChange={updateField("storeName")}
+                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 outline-none focus:border-slate-400 disabled:bg-slate-100"
+                      />
+                    </label>
+                    <label className="text-sm font-medium text-slate-700">
+                      Currency code
+                      <input
+                        required
+                        maxLength={3}
+                        disabled={!canEdit}
+                        value={form.currency}
+                        onChange={updateField("currency")}
+                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 uppercase outline-none focus:border-slate-400 disabled:bg-slate-100"
+                      />
+                    </label>
+                    <label className="text-sm font-medium text-slate-700">
+                      Tax rate (%)
+                      <input
+                        required
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        disabled={!canEdit}
+                        value={form.taxRate}
+                        onChange={updateField("taxRate")}
+                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 outline-none focus:border-slate-400 disabled:bg-slate-100"
+                      />
+                    </label>
+                    <label className="text-sm font-medium text-slate-700">
+                      Logo URL
+                      <input
+                        type="url"
+                        disabled={!canEdit}
+                        value={form.logoUrl}
+                        onChange={updateField("logoUrl")}
+                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 outline-none focus:border-slate-400 disabled:bg-slate-100"
+                      />
+                    </label>
+                    <label className="text-sm font-medium text-slate-700 md:col-span-2">
+                      Store address
+                      <textarea
+                        rows="3"
+                        disabled={!canEdit}
+                        value={form.address}
+                        onChange={updateField("address")}
+                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 outline-none focus:border-slate-400 disabled:bg-slate-100"
+                      />
+                    </label>
+                  </div>
+                )}
+
+                {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+                {message && (
+                  <p className="mt-4 text-sm text-emerald-600">{message}</p>
+                )}
+                {canEdit && !loading && (
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="mt-6 flex items-center gap-2 rounded-lg bg-[#1a2540] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#253258] disabled:opacity-60"
+                  >
+                    <Save size={16} />
+                    {saving ? "Saving..." : "Save settings"}
+                  </button>
+                )}
+              </form>
             )}
 
-            {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
-            {message && (
-              <p className="mt-4 text-sm text-emerald-600">{message}</p>
+            {activeTab === "password" && (
+              <form onSubmit={handlePasswordSubmit} className="max-w-xl">
+                <div className="space-y-5">
+                  <label className="block text-sm font-medium text-slate-700">
+                    Current Password
+                    <input
+                      type="password"
+                      value={passwordForm.currentPassword}
+                      onChange={updatePasswordField("currentPassword")}
+                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 outline-none focus:border-slate-400"
+                    />
+                  </label>
+                  <label className="block text-sm font-medium text-slate-700">
+                    New Password
+                    <input
+                      type="password"
+                      value={passwordForm.newPassword}
+                      onChange={updatePasswordField("newPassword")}
+                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 outline-none focus:border-slate-400"
+                    />
+                  </label>
+                  <label className="block text-sm font-medium text-slate-700">
+                    Confirm Password
+                    <input
+                      type="password"
+                      value={passwordForm.confirmPassword}
+                      onChange={updatePasswordField("confirmPassword")}
+                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 outline-none focus:border-slate-400"
+                    />
+                  </label>
+                </div>
+
+                {passwordError && (
+                  <p className="mt-4 text-sm text-red-600">{passwordError}</p>
+                )}
+                {passwordMessage && (
+                  <p className="mt-4 text-sm text-emerald-600">
+                    {passwordMessage}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={passwordSaving}
+                  className="mt-6 flex items-center gap-2 rounded-lg bg-[#1a2540] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#253258] disabled:opacity-60"
+                >
+                  <Save size={16} />
+                  {passwordSaving ? "Updating..." : "Update Password"}
+                </button>
+              </form>
             )}
-            {canEdit && !loading && (
-              <button
-                type="submit"
-                disabled={saving}
-                className="mt-6 flex items-center gap-2 rounded-lg bg-[#1a2540] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#253258] disabled:opacity-60"
-              >
-                <Save size={16} />
-                {saving ? "Saving..." : "Save settings"}
-              </button>
-            )}
-          </form>
+          </div>
         </main>
       </div>
     </div>
