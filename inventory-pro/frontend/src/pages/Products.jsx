@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, Plus, Truck } from "lucide-react";
+import { AlertTriangle, Plus, Search, Truck } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import InventoryTable from "../components/InventoryTable";
@@ -166,14 +166,6 @@ export default function Products() {
       </div>
 
       <div className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto">
-        <Topbar
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          categories={categories}
-        />
-
         <main className="p-8">
           <div className="mb-6 flex items-start justify-between">
             <div>
@@ -262,6 +254,33 @@ export default function Products() {
                 </div>
               ),
             )}
+          </div>
+
+          <div className="mb-4 flex items-center gap-3">
+            <label className="flex flex-1 items-center gap-2 rounded-lg border border-[#dfe1df] bg-[#f3f4f2] px-3.5 py-3 text-sm text-slate-400 shadow-sm">
+              <Search size={16} className="text-slate-500" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search products, SKUs, or brands..."
+                className="w-full bg-transparent text-[15px] text-slate-700 outline-none placeholder:text-slate-400"
+              />
+            </label>
+
+            <label className="flex min-w-[180px] items-center justify-between rounded-lg border border-[#dfe1df] bg-[#f3f4f2] px-3.5 py-3 text-sm text-slate-700 shadow-sm">
+              <select
+                value={selectedCategory}
+                onChange={(event) => setSelectedCategory(event.target.value)}
+                className="w-full bg-transparent text-[15px] font-medium outline-none"
+              >
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
 
           <div className="grid gap-6">
