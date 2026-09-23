@@ -2,6 +2,54 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword, userId } = req.body;
+    const targetUserId = req.user?.id || userId;
+
+    if (!targetUserId) {
+      return res.status(401).json({ message: "User not authenticated." });
+    }
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        message: "Current password and new password are required.",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        message: "New password must be at least 6 characters long.",
+      });
+    }
+
+    const user = await User.findById(targetUserId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const storedPassword = user.password || "";
+    const isHashMatch = await bcrypt.compare(currentPassword, storedPassword);
+    const isPlainTextMatch = storedPassword === currentPassword;
+
+    if (!isHashMatch && !isPlainTextMatch) {
+      return res
+        .status(401)
+        .json({ message: "Current password is incorrect." });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    return res.status(200).json({ message: "Password updated successfully!" });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || "Unable to update password.",
+    });
+  }
+};
+
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;

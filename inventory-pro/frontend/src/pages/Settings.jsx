@@ -97,20 +97,32 @@ export default function Settings() {
       return;
     }
 
+    const token = localStorage.getItem("token");
+
     setPasswordSaving(true);
 
     try {
-      await api.put("/auth/change-password", {
-        currentPassword: passwordForm.currentPassword,
-        newPassword: passwordForm.newPassword,
-      });
+      const response = await api.put(
+        "/auth/change-password",
+        {
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword,
+        },
+        {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+        },
+      );
 
-      setPasswordMessage("Password updated successfully.");
+      setPasswordMessage(
+        response.data?.message || "Password updated successfully!",
+      );
       setPasswordForm(initialPasswordForm);
     } catch (requestError) {
-      setPasswordError(
-        requestError.response?.data?.message || "Unable to update password.",
-      );
+      const serverMessage =
+        requestError?.response?.data?.message || "Unable to update password.";
+      setPasswordError(serverMessage);
     } finally {
       setPasswordSaving(false);
     }
