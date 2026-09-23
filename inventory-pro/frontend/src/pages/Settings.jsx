@@ -13,6 +13,7 @@ const currencyOptions = [
   { code: "INR", symbol: "₹" },
   { code: "AED", symbol: "د.إ" },
   { code: "SAR", symbol: "﷼" },
+  { code: "QAR", symbol: "ر.ق" },
   { code: "JPY", symbol: "¥" },
   { code: "CAD", symbol: "C$" },
   { code: "AUD", symbol: "A$" },

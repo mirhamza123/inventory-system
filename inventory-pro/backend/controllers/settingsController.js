@@ -17,6 +17,7 @@ const currencySymbols = {
   INR: "₹",
   AED: "د.إ",
   SAR: "﷼",
+  QAR: "ر.ق",
   JPY: "¥",
   CAD: "C$",
   AUD: "A$",
