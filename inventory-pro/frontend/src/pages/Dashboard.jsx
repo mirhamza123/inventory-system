@@ -343,32 +343,7 @@ export default function Dashboard() {
 
       <div className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto">
         <header className="h-16 bg-white border-b border-[#e6e6e2] flex items-center justify-between px-6">
-          <div className="flex items-center gap-3 flex-1 max-w-2xl">
-            <label className="flex flex-1 items-center gap-2 rounded-lg bg-[#f3f4f2] px-3.5 py-2 text-sm text-slate-400">
-              <Search size={15} />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search activities..."
-                className="w-full bg-transparent outline-none placeholder:text-slate-400"
-              />
-            </label>
-            <label className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600">
-              <select
-                value={selectedCategory}
-                onChange={(event) => setSelectedCategory(event.target.value)}
-                className="bg-transparent outline-none"
-              >
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-              {/* <ChevronDown size={14} className="pointer-events-none" /> */}
-            </label>
-          </div>
+          <div className="flex items-center gap-3 flex-1 max-w-2xl" />
 
           <div className="flex items-center gap-6" />
         </header>
@@ -520,6 +495,34 @@ export default function Dashboard() {
                 {filteredStats.soCount} Completed Orders |{" "}
                 {getActiveFilterLabel()}
               </div>
+            </div>
+          </div>
+
+          <div className="mb-">
+            <div className="flex items-center gap-3 flex-1 max-w-2xl mb-4">
+              <label className="flex flex-1 items-center gap-2 rounded-lg bg-[#f3f4f2] px-3.5 py-10 text-sm text-slate-400">
+                <Search size={15} />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="Search activities..."
+                  className="w-full bg-transparent outline-none placeholder:text-slate-400"
+                />
+              </label>
+              <label className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600">
+                <select
+                  value={selectedCategory}
+                  onChange={(event) => setSelectedCategory(event.target.value)}
+                  className="bg-transparent outline-none"
+                >
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
           </div>
 
