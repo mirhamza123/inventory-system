@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import AlertsPage from "./pages/AlertsPage";
 import Dashboard from "./pages/Dashboard";
+import InvoicesPage from "./pages/InvoicesPage";
 import Login from "./pages/Login";
 import Products from "./pages/Products";
 import Register from "./pages/Register";
@@ -47,6 +48,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <StockInOut />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/invoices"
+        element={
+          <ProtectedRoute>
+            <InvoicesPage />
           </ProtectedRoute>
         }
       />

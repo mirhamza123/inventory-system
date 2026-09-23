@@ -5,6 +5,25 @@ import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import { exportSalesReport } from "../utils/exportReports";
 
+const INVOICE_HISTORY_KEY = "invoiceHistory";
+
+const getInvoiceHistory = () => {
+  try {
+    const stored = localStorage.getItem(INVOICE_HISTORY_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    return [];
+  }
+};
+
+const formatCurrency = (value, symbol = "$") => {
+  const safeSymbol = String(symbol || "$").trim() || "$";
+  return `${safeSymbol}${Number(value || 0).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+};
+
 export default function StockInOut() {
   const [currencySymbol, setCurrencySymbol] = useState(
     () => localStorage.getItem("currencySymbol") || "$",
@@ -20,6 +39,7 @@ export default function StockInOut() {
     quantity: "",
     reason: "",
     discount: "",
+    customerName: "",
   });
   const { logout } = useAuth();
 
@@ -65,21 +85,78 @@ export default function StockInOut() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await api.post("/stock", {
+
+    if (form.type === "stock-out") {
+      const requestedQty = Number(form.quantity || 0);
+      if (!selectedProduct) {
+        alert("Please select a product first.");
+        return;
+      }
+
+      if (!Number.isInteger(requestedQty) || requestedQty <= 0) {
+        alert("Please enter a valid quantity for the stock out.");
+        return;
+      }
+
+      if (requestedQty > Number(selectedProduct.quantity || 0)) {
+        alert(
+          `Only ${selectedProduct.quantity} unit(s) available for ${selectedProduct.name}.`,
+        );
+        return;
+      }
+    }
+
+    const payload = {
       ...form,
       quantity: Number(form.quantity),
       saleType: form.type === "stock-out" ? form.saleType : undefined,
       discount: form.type === "stock-out" ? Number(form.discount || 0) : 0,
-    });
-    setForm({
-      productId: "",
-      type: "stock-in",
-      saleType: "Retail",
-      quantity: "",
-      reason: "",
-      discount: "",
-    });
-    fetchData();
+      reason: form.reason || (form.type === "stock-out" ? "Stock out" : "Manual entry"),
+      customerName:
+        form.type === "stock-out" ? form.customerName || "Walk-in Customer" : "",
+    };
+
+    try {
+      const response = await api.post("/stock", payload);
+
+      if (form.type === "stock-out") {
+        const invoiceEntry = {
+          id: response?.data?._id || `INV-${Date.now()}`,
+          customerName: form.customerName || "Walk-in Customer",
+          productName: selectedProduct?.name || response?.data?.productName || "Product",
+          quantity: Number(form.quantity || 0),
+          price: Number(
+            response?.data?.sellingPrice ?? unitPrice ?? 0,
+          ),
+          discount: Number(response?.data?.discount ?? form.discount ?? 0),
+          netTotal: Number(
+            response?.data?.finalAmount ?? finalAmount ?? 0,
+          ),
+          date: response?.data?.createdAt || new Date().toISOString(),
+          type: form.type,
+          saleType: form.saleType,
+          reason: form.reason || "Stock out",
+        };
+
+        localStorage.setItem(
+          INVOICE_HISTORY_KEY,
+          JSON.stringify([invoiceEntry, ...getInvoiceHistory()].slice(0, 50)),
+        );
+      }
+
+      setForm({
+        productId: "",
+        type: "stock-in",
+        saleType: "Retail",
+        quantity: "",
+        reason: "",
+        discount: "",
+        customerName: "",
+      });
+      fetchData();
+    } catch (error) {
+      alert(error.response?.data?.message || "Unable to save transaction.");
+    }
   };
 
   return (
@@ -148,6 +225,15 @@ export default function StockInOut() {
               </select>
               {form.type === "stock-out" && (
                 <>
+                  <input
+                    className="w-full rounded border p-3"
+                    placeholder="Customer Name"
+                    value={form.customerName}
+                    onChange={(e) =>
+                      setForm({ ...form, customerName: e.target.value })
+                    }
+                  />
+
                   <select
                     className="w-full rounded border p-3"
                     value={form.saleType}
@@ -237,6 +323,7 @@ export default function StockInOut() {
             </div>
           </div>
         </div>
+
       </main>
     </div>
   );
