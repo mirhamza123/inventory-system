@@ -498,9 +498,9 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="mb-">
-            <div className="flex items-center gap-3 flex-1 max-w-2xl mb-4">
-              <label className="flex flex-1 items-center gap-2 rounded-lg bg-[#f3f4f2] px-3.5 py-10 text-sm text-slate-400">
+          <div className="mb-4 ">
+            <div className="flex items-center gap-3 flex-1 max-w-2xl mb-4 mt-10">
+              <label className="flex flex-1 items-center gap-2 rounded-lg bg-[#f3f4f2] px-3.5 py-2 text-sm text-black border border-[#b8b8b7] ">
                 <Search size={15} />
                 <input
                   type="text"
