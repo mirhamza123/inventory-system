@@ -28,6 +28,10 @@ const buildStats = (products) => {
       value: products.length.toLocaleString(),
       tag: "+12%",
       tagColor: "text-emerald-600",
+      accent: "border-l-[#2f8a5a]",
+      iconBg: "bg-[#eef2ff] text-[#4052d7]",
+      status: "↗ +12% from last month",
+      statusColor: "text-[#2e9e5b]",
     },
     {
       label: "Low Stock",
@@ -35,17 +39,31 @@ const buildStats = (products) => {
       valueColor: "text-red-600",
       icon: AlertTriangle,
       iconColor: "text-red-500",
+      accent: "border-l-[#e53935]",
+      iconBg: "bg-[#ffefef] text-[#e53935]",
+      status: "Needs attention",
+      statusColor: "text-[#d43d3d]",
     },
     {
       label: "Total Units",
       value: totalUnits.toLocaleString(),
       suffix: "Units",
+      accent: "border-l-[#4169e1]",
+      iconBg: "bg-[#eaf1ff] text-[#4169e1]",
+      status: "Units in stock",
+      statusColor: "text-[#5f6c7b]",
+      icon: Truck,
+      iconColor: "text-[#4169e1]",
     },
     {
       label: "Stock Value",
       value: `$${stockValue.toLocaleString()}`,
       icon: Truck,
       iconColor: "text-slate-400",
+      accent: "border-l-[#8a5cf6]",
+      iconBg: "bg-[#f3e8ff] text-[#8a5cf6]",
+      status: "Updated 5 mins ago",
+      statusColor: "text-[#6b7280]",
     },
   ];
 };
@@ -149,7 +167,6 @@ export default function Products() {
 
       <div className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto">
         <Topbar
-          title="Product inventory"
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           selectedCategory={selectedCategory}
@@ -184,7 +201,7 @@ export default function Products() {
             </div>
           </div>
 
-          <div className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mb-5 grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 ">
             {stats.map(
               ({
                 label,
@@ -195,29 +212,52 @@ export default function Products() {
                 suffix,
                 icon: Icon,
                 iconColor,
+                accent,
+                iconBg,
+                status,
+                statusColor,
               }) => (
                 <div
                   key={label}
-                  className="rounded-xl border border-slate-200 bg-white px-5 py-4"
+                  className={`flex h-[120px] flex-col justify-between rounded-xl border border-[#eceee9] bg-white p-4  ${accent} `}
                 >
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                  <div className="flex items-start justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8a8f9c]">
                       {label}
                     </span>
-                    {Icon && <Icon size={16} className={iconColor} />}
+                    {Icon ? (
+                      <div
+                        className={`flex h-8 w-8 items-center justify-center rounded-lg ${iconBg}`}
+                      >
+                        <Icon size={16} className={iconColor} />
+                      </div>
+                    ) : (
+                      <div className="h-8 w-8" />
+                    )}
                   </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className={`text-2xl font-bold ${valueColor || ""}`}>
+
+                  <div className="flex items-end gap-2">
+                    <span
+                      className={`text-2xl font-bold leading-none ${valueColor || "text-[#1a2332]"}`}
+                    >
                       {value}
                     </span>
                     {tag && (
-                      <span className={`text-xs font-semibold ${tagColor}`}>
+                      <span
+                        className={`pb-1 text-sm font-semibold ${tagColor}`}
+                      >
                         {tag}
                       </span>
                     )}
                     {suffix && (
-                      <span className="text-xs text-slate-400">{suffix}</span>
+                      <span className="pb-1 text-[14px] text-slate-400">
+                        {suffix}
+                      </span>
                     )}
+                  </div>
+
+                  <div className={`text-[12px] font-medium ${statusColor}`}>
+                    {status}
                   </div>
                 </div>
               ),
