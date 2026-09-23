@@ -14,6 +14,20 @@ const formatCurrency = (value, symbol = "$") => {
   })}`;
 };
 
+const formatCurrencySigned = (value, symbol = "$") => {
+  const safeSymbol = String(symbol || "$").trim() || "$";
+  const numericValue = Number(value || 0);
+  const absolute = Math.abs(numericValue);
+  const formatted = absolute.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  return numericValue < 0
+    ? `-${safeSymbol}${formatted}`
+    : `${safeSymbol}${formatted}`;
+};
+
 const getInvoiceHistory = () => {
   try {
     const stored = localStorage.getItem(INVOICE_HISTORY_KEY);
@@ -30,6 +44,15 @@ export default function InvoicesPage() {
     () => localStorage.getItem("currencySymbol") || "$",
   );
   const { logout } = useAuth();
+
+  const selectedInvoiceSubtotal = selectedInvoice
+    ? Number(selectedInvoice.price || 0) * Number(selectedInvoice.quantity || 0)
+    : 0;
+  const selectedInvoiceDiscount = Number(selectedInvoice?.discount || 0);
+  const selectedInvoiceNetTotal = Math.max(
+    selectedInvoiceSubtotal - selectedInvoiceDiscount,
+    0,
+  );
 
   useEffect(() => {
     setInvoices(getInvoiceHistory());
@@ -259,7 +282,7 @@ export default function InvoicesPage() {
                       </td>
                       <td style={{ padding: "10px 8px" }}>
                         {formatCurrency(
-                          selectedInvoice.netTotal,
+                          selectedInvoiceSubtotal,
                           currencySymbol,
                         )}
                       </td>
@@ -282,9 +305,9 @@ export default function InvoicesPage() {
                       fontSize: "14px",
                     }}
                   >
-                    <span>Price</span>
+                    <span>Subtotal</span>
                     <span>
-                      {formatCurrency(selectedInvoice.price, currencySymbol)}
+                      {formatCurrency(selectedInvoiceSubtotal, currencySymbol)}
                     </span>
                   </div>
                   <div
@@ -297,7 +320,10 @@ export default function InvoicesPage() {
                   >
                     <span>Discount</span>
                     <span>
-                      {formatCurrency(selectedInvoice.discount, currencySymbol)}
+                      {formatCurrencySigned(
+                        -selectedInvoiceDiscount,
+                        currencySymbol,
+                      )}
                     </span>
                   </div>
                   <div
@@ -312,7 +338,7 @@ export default function InvoicesPage() {
                   >
                     <span>Net Total</span>
                     <span>
-                      {formatCurrency(selectedInvoice.netTotal, currencySymbol)}
+                      {formatCurrency(selectedInvoiceNetTotal, currencySymbol)}
                     </span>
                   </div>
                 </div>
