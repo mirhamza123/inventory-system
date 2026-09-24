@@ -23,9 +23,7 @@ const initialForm = {
   storeName: "",
   currency: "USD",
   currencySymbol: "$",
-  taxRate: 0,
   address: "",
-  logoUrl: "",
 };
 
 const initialPasswordForm = {
@@ -114,7 +112,6 @@ export default function Settings() {
         ...form,
         currency: form.currency || "USD",
         currencySymbol: normalizedCurrencySymbol,
-        taxRate: Number(form.taxRate),
       };
 
       const response = await api.put("/settings", payload);
@@ -277,30 +274,6 @@ export default function Settings() {
                           </option>
                         ))}
                       </select>
-                    </label>
-                    <label className="text-sm font-medium text-slate-700">
-                      Tax rate (%)
-                      <input
-                        required
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="0.01"
-                        disabled={!canEdit}
-                        value={form.taxRate}
-                        onChange={updateField("taxRate")}
-                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 outline-none focus:border-slate-400 disabled:bg-slate-100"
-                      />
-                    </label>
-                    <label className="text-sm font-medium text-slate-700">
-                      Logo URL
-                      <input
-                        type="url"
-                        disabled={!canEdit}
-                        value={form.logoUrl}
-                        onChange={updateField("logoUrl")}
-                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 outline-none focus:border-slate-400 disabled:bg-slate-100"
-                      />
                     </label>
                     <label className="text-sm font-medium text-slate-700 md:col-span-2">
                       Store address
