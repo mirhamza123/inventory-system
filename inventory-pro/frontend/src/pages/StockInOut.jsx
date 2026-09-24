@@ -39,6 +39,7 @@ export default function StockInOut() {
     quantity: "",
     reason: "",
     discount: "",
+    discountType: "fixed",
     customerName: "",
   });
   const { logout } = useAuth();
@@ -53,8 +54,13 @@ export default function StockInOut() {
       : 0;
   const quantity = Number(form.quantity || 0);
   const subtotal = unitPrice * quantity;
+  const rawDiscountValue = Number(form.discount || 0);
   const discountAmount =
-    form.type === "stock-out" ? Math.max(0, Number(form.discount || 0)) : 0;
+    form.type === "stock-out"
+      ? form.discountType === "percent"
+        ? (Math.min(Math.max(rawDiscountValue, 0), 100) / 100) * subtotal
+        : Math.max(0, rawDiscountValue)
+      : 0;
   const finalAmount = Math.max(subtotal - discountAmount, 0);
 
   const fetchData = async () => {
@@ -110,6 +116,8 @@ export default function StockInOut() {
       ...form,
       quantity: Number(form.quantity),
       saleType: form.type === "stock-out" ? form.saleType : undefined,
+      discountType:
+        form.type === "stock-out" ? form.discountType || "fixed" : "fixed",
       discount: form.type === "stock-out" ? Number(form.discount || 0) : 0,
       reason:
         form.reason ||
@@ -152,6 +160,7 @@ export default function StockInOut() {
         quantity: "",
         reason: "",
         discount: "",
+        discountType: "fixed",
         customerName: "",
       });
       fetchData();
@@ -246,20 +255,39 @@ export default function StockInOut() {
                     <option value="Wholesale">Wholesale</option>
                   </select>
 
-                  <input
-                    className="w-full rounded border p-3"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder={`Discount Amount (${currencySymbol})`}
-                    value={form.discount}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        discount: e.target.value,
-                      })
-                    }
-                  />
+                  <div className="flex gap-2">
+                    <select
+                      className="w-32 rounded border p-3"
+                      value={form.discountType}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          discountType: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="fixed">Fixed</option>
+                      <option value="percent">Percent</option>
+                    </select>
+                    <input
+                      className="w-full rounded border p-3"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder={
+                        form.discountType === "percent"
+                          ? "Discount %"
+                          : `Discount Amount (${currencySymbol})`
+                      }
+                      value={form.discount}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          discount: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
                 </>
               )}
               <input
@@ -286,7 +314,11 @@ export default function StockInOut() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between py-1 text-red-600">
-                    <span>Discount Applied</span>
+                    <span>
+                      Discount Applied
+                      {form.discountType === "percent" &&
+                        ` (${Number(form.discount || 0).toFixed(2)}%)`}
+                    </span>
                     <span>
                       - {currencySymbol}
                       {discountAmount.toFixed(2)}

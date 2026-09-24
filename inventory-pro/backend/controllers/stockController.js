@@ -21,6 +21,7 @@ export const createTransaction = async (req, res) => {
       reason,
       saleType,
       discount = 0,
+      discountType = "fixed",
     } = req.body;
 
     if (!productId || !type || quantity === undefined) {
@@ -58,9 +59,15 @@ export const createTransaction = async (req, res) => {
         resolvedSaleType === "Wholesale"
           ? product.wholesalePrice || product.price
           : product.retailPrice || product.price;
-      const normalizedDiscount = Math.max(0, Number(discount) || 0);
       const grossRevenue = Number(sellingPrice || 0) * Number(quantity || 0);
-      const safeDiscount = Math.min(normalizedDiscount, grossRevenue);
+      const normalizedDiscountType =
+        discountType === "percent" ? "percent" : "fixed";
+      const normalizedDiscount = Math.max(0, Number(discount) || 0);
+      const safeDiscount =
+        normalizedDiscountType === "percent"
+          ? (Math.min(Math.max(normalizedDiscount, 0), 100) / 100) *
+            grossRevenue
+          : Math.min(normalizedDiscount, grossRevenue);
       const finalAmount = Math.max(grossRevenue - safeDiscount, 0);
       const unitProfit = sellingPrice - (product.purchasePrice || 0);
       const totalProfit = unitProfit * quantity;
@@ -70,6 +77,7 @@ export const createTransaction = async (req, res) => {
         sellingPrice,
         unitProfit,
         totalProfit,
+        discountType: normalizedDiscountType,
         discount: safeDiscount,
         finalAmount,
       };
