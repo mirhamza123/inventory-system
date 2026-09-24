@@ -92,12 +92,12 @@ export default function InvoicesPage() {
   };
 
   return (
-    <div className="flex min-h-screen w-full max-w-full overflow-hidden bg-slate-100">
+    <div className="flex h-screen w-screen overflow-hidden bg-slate-100">
       <div className="h-screen flex-shrink-0 overflow-hidden">
         <Sidebar onLogout={logout} />
       </div>
 
-      <main className="flex min-h-screen min-w-0 flex-1 flex-col overflow-y-auto p-6">
+      <main className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto p-6">
         <Topbar title="Bill History" />
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
