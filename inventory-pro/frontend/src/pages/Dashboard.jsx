@@ -388,12 +388,6 @@ export default function Dashboard() {
                 Real-time status of your warehouse inventory.
               </p>
             </div>
-            <button
-              onClick={() => console.log("Open transaction modal")}
-              className="bg-[#1a2540] text-white rounded-lg px-2 py-2 font-semibold"
-            >
-              + New Stock Entry
-            </button>
           </div>
 
           <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between mb-4 bg-[#f9fafb] border border-[#eceee9] rounded-lg p-4">
