@@ -118,6 +118,7 @@ export default function StockInOut() {
       saleType: form.type === "stock-out" ? form.saleType : undefined,
       discountType:
         form.type === "stock-out" ? form.discountType || "fixed" : "fixed",
+      discountValue: form.type === "stock-out" ? Number(form.discount || 0) : 0,
       discount: form.type === "stock-out" ? Number(form.discount || 0) : 0,
       reason:
         form.reason ||
@@ -140,6 +141,11 @@ export default function StockInOut() {
           quantity: Number(form.quantity || 0),
           price: Number(response?.data?.sellingPrice ?? unitPrice ?? 0),
           discount: Number(response?.data?.discount ?? form.discount ?? 0),
+          discountType:
+            response?.data?.discountType || form.discountType || "fixed",
+          discountValue: Number(
+            response?.data?.discountValue ?? form.discount ?? 0,
+          ),
           netTotal: Number(response?.data?.finalAmount ?? finalAmount ?? 0),
           date: response?.data?.createdAt || new Date().toISOString(),
           type: form.type,
