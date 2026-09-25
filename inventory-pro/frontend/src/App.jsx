@@ -8,6 +8,8 @@ import Products from "./pages/Products";
 import Register from "./pages/Register";
 import StockInOut from "./pages/StockInOut";
 import Settings from "./pages/Settings";
+import SupplierDetail from "./pages/SupplierDetail";
+import SupplierList from "./pages/SupplierList";
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
@@ -40,6 +42,22 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Products />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/suppliers"
+        element={
+          <ProtectedRoute>
+            <SupplierList />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/suppliers/:supplierId"
+        element={
+          <ProtectedRoute>
+            <SupplierDetail />
           </ProtectedRoute>
         }
       />

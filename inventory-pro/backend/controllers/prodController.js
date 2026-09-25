@@ -86,6 +86,7 @@ export const addProduct = async (req, res) => {
       wholesalePrice,
       quantity,
       category,
+      supplier,
       status,
       expiryDate,
     } = req.body;
@@ -113,6 +114,7 @@ export const addProduct = async (req, res) => {
       price: Number(retailPrice),
       quantity: Number(quantity),
       category,
+      supplier: supplier || "",
       status,
       expiryDate: expiryDate ? new Date(expiryDate) : null,
     });
@@ -144,6 +146,8 @@ export const updateProduct = async (req, res) => {
       product.quantity = Number(req.body.quantity);
     }
     if (req.body.category !== undefined) product.category = req.body.category;
+    if (req.body.supplier !== undefined)
+      product.supplier = req.body.supplier || "";
     if (req.body.status !== undefined) product.status = req.body.status;
     if (req.body.expiryDate !== undefined) {
       product.expiryDate = req.body.expiryDate

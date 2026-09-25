@@ -5,6 +5,7 @@ import {
   LogOut,
   Repeat,
   Settings,
+  Truck,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
@@ -13,6 +14,7 @@ import api from "../utils/api";
 const navItems = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutGrid },
   { label: "Products", to: "/products", icon: FileText },
+  { label: "Suppliers", to: "/suppliers", icon: Truck },
   { label: "Stock In/Out", to: "/stock", icon: Repeat },
   { label: "Invoices", to: "/invoices", icon: FileText },
   { label: "Alerts", to: "/alerts", icon: Bell },
