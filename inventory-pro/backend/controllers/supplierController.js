@@ -133,7 +133,7 @@ export const getSupplierById = async (req, res) => {
 
 export const createSupplier = async (req, res) => {
   try {
-    const { name, companyName, phone, address } = req.body;
+    const { name, companyName, email, phone, address } = req.body;
 
     if (!name || !companyName) {
       return res
@@ -144,6 +144,7 @@ export const createSupplier = async (req, res) => {
     const supplier = await Supplier.create({
       name,
       companyName,
+      email: typeof email === "string" ? email.trim() : "",
       phone: phone || "",
       address: address || "",
       totalPurchased: 0,
@@ -197,6 +198,7 @@ export const recordPurchase = async (req, res) => {
     await product.save();
 
     const transaction = await Transaction.create({
+      source: "supplier-purchase",
       type: "stock-in",
       product: product._id,
       productName: product.name,
@@ -238,9 +240,12 @@ export const updateSupplier = async (req, res) => {
       return res.status(404).json({ message: "Supplier not found" });
     }
 
-    const { name, companyName, phone, address } = req.body;
+    const { name, companyName, email, phone, address } = req.body;
     if (name !== undefined) supplier.name = name;
     if (companyName !== undefined) supplier.companyName = companyName;
+    if (email !== undefined) {
+      supplier.email = typeof email === "string" ? email.trim() : "";
+    }
     if (phone !== undefined) supplier.phone = phone || "";
     if (address !== undefined) supplier.address = address || "";
 

@@ -282,15 +282,19 @@ export default function Dashboard() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [productsRes, transactionsRes] = await Promise.all([
-          api.get("/products"),
-          api.get("/stock"),
-        ]);
+        const [productsRes, transactionsRes, activitiesRes] = await Promise.all(
+          [
+            api.get("/products"),
+            api.get("/stock"),
+            api.get("/stock/activities"),
+          ],
+        );
 
         if (!mounted) return;
 
         const products = productsRes.data || [];
         const transactions = transactionsRes.data || [];
+        const activityLogs = activitiesRes.data || [];
 
         setProducts(products);
         setTotalItems(products.length);
@@ -306,8 +310,8 @@ export default function Dashboard() {
         // Store transactions for later filtering
         setTransactions(transactions);
 
-        // Map transactions into the UI-friendly shape
-        const mapped = transactions.map((t) => ({
+        // Map Stock In/Out activity logs into the UI-friendly shape
+        const mapped = activityLogs.map((t) => ({
           date: new Date(t.createdAt).toLocaleString(),
           product: t.product?.name || "Product",
           action: t.type === "stock-in" ? "Stock In" : "Stock Out",

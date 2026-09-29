@@ -17,6 +17,7 @@ import api from "../utils/api";
 const emptySupplierForm = {
   name: "",
   companyName: "",
+  email: "",
   phone: "",
   address: "",
 };
@@ -179,6 +180,7 @@ export default function SupplierList() {
         ...supplierForm,
         name: supplierForm.name.trim(),
         companyName: supplierForm.companyName.trim(),
+        email: supplierForm.email.trim(),
         phone: supplierForm.phone.trim(),
         address: supplierForm.address.trim(),
       });
@@ -525,6 +527,21 @@ export default function SupplierList() {
               }
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-slate-400"
               required
+            />
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-slate-700">
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={supplierForm.email}
+              onChange={(event) =>
+                setSupplierForm({ ...supplierForm, email: event.target.value })
+              }
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-slate-400"
             />
           </div>
 

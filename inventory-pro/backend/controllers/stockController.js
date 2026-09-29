@@ -13,6 +13,22 @@ export const getTransactions = async (_req, res) => {
   }
 };
 
+export const getStockActivities = async (_req, res) => {
+  try {
+    const activities = await Transaction.find({
+      $or: [
+        { source: "stock-in-out" },
+        { source: { $exists: false }, supplier: null },
+      ],
+    })
+      .populate("product")
+      .sort({ createdAt: -1 });
+    res.json(activities);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const createTransaction = async (req, res) => {
   try {
     const {
@@ -91,6 +107,7 @@ export const createTransaction = async (req, res) => {
     }
 
     const transaction = await Transaction.create({
+      source: "stock-in-out",
       product: productId,
       productName: product.name,
       purchasePrice: product.purchasePrice || 0,

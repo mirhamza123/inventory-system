@@ -3,6 +3,11 @@ import mongoose from "mongoose";
 const transactionSchema = new mongoose.Schema(
   {
     type: { type: String, enum: ["stock-in", "stock-out"], required: true },
+    source: {
+      type: String,
+      enum: ["stock-in-out", "supplier-purchase"],
+      required: true,
+    },
     saleType: { type: String, enum: ["Retail", "Wholesale"], trim: true },
     sellingPrice: { type: Number, min: 0, default: 0 },
     purchasePrice: { type: Number, min: 0, default: 0 },
