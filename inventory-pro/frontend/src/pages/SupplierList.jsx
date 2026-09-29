@@ -274,9 +274,9 @@ export default function SupplierList() {
         <main className="p-8">
           <div className="mb-6 flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-600">
+              {/* <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-600">
                 Suppliers
-              </p>
+              </p> */}
               <h2 className="mt-2 text-3xl font-bold text-slate-900">
                 Supplier management
               </h2>
@@ -358,7 +358,7 @@ export default function SupplierList() {
                 <span className="text-sm text-slate-500">Suppliers</span>
                 <Building2 className="text-emerald-600" size={18} />
               </div>
-              <div className="mt-4 text-3xl font-bold text-slate-900">
+              <div className="mt-4 text-2xl font-bold text-slate-900">
                 {summary.count}
               </div>
             </div>
@@ -368,7 +368,7 @@ export default function SupplierList() {
                 <span className="text-sm text-slate-500">Total purchased</span>
                 <ReceiptText className="text-blue-600" size={18} />
               </div>
-              <div className="mt-4 text-3xl font-bold text-slate-900">
+              <div className="mt-4 text-2xl font-bold text-slate-900">
                 {formatCurrency(summary.totalPurchased)}
               </div>
             </div>
@@ -378,7 +378,7 @@ export default function SupplierList() {
                 <span className="text-sm text-slate-500">Total payable</span>
                 <CircleDollarSign className="text-amber-600" size={18} />
               </div>
-              <div className="mt-4 text-3xl font-bold text-slate-900">
+              <div className="mt-4 text-2xl font-bold text-slate-900">
                 {formatCurrency(summary.totalPayable)}
               </div>
             </div>
