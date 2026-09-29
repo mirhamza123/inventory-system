@@ -104,6 +104,13 @@ export const addProduct = async (req, res) => {
         .json({ message: "Missing required product fields" });
     }
 
+    const normalizedQuantity = Number(quantity);
+    if (!Number.isFinite(normalizedQuantity) || normalizedQuantity <= 0) {
+      return res
+        .status(400)
+        .json({ message: "Quantity must be greater than 0" });
+    }
+
     const product = await Product.create({
       name,
       brand,
@@ -112,7 +119,7 @@ export const addProduct = async (req, res) => {
       retailPrice: Number(retailPrice),
       wholesalePrice: Number(wholesalePrice),
       price: Number(retailPrice),
-      quantity: Number(quantity),
+      quantity: normalizedQuantity,
       category,
       supplier: supplier || "",
       status,
@@ -143,7 +150,13 @@ export const updateProduct = async (req, res) => {
     if (req.body.wholesalePrice !== undefined)
       product.wholesalePrice = Number(req.body.wholesalePrice);
     if (req.body.quantity !== undefined) {
-      product.quantity = Number(req.body.quantity);
+      const normalizedQuantity = Number(req.body.quantity);
+      if (!Number.isFinite(normalizedQuantity) || normalizedQuantity <= 0) {
+        return res
+          .status(400)
+          .json({ message: "Quantity must be greater than 0" });
+      }
+      product.quantity = normalizedQuantity;
     }
     if (req.body.category !== undefined) product.category = req.body.category;
     if (req.body.supplier !== undefined)

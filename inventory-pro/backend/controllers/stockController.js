@@ -48,18 +48,26 @@ export const createTransaction = async (req, res) => {
       return res.status(400).json({ message: "Missing transaction fields" });
     }
 
+    const normalizedQuantity = Number(quantity);
+    if (!Number.isFinite(normalizedQuantity) || normalizedQuantity <= 0) {
+      return res
+        .status(400)
+        .json({ message: "Quantity must be greater than 0" });
+    }
+
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    if (type === "stock-out" && product.quantity < quantity) {
+    if (type === "stock-out" && product.quantity < normalizedQuantity) {
       return res
         .status(400)
         .json({ message: "Insufficient stock for stock out" });
     }
 
-    const delta = type === "stock-in" ? quantity : -quantity;
+    const delta =
+      type === "stock-in" ? normalizedQuantity : -normalizedQuantity;
     product.quantity += delta;
     await product.save();
 
@@ -79,7 +87,7 @@ export const createTransaction = async (req, res) => {
         resolvedSaleType === "Wholesale"
           ? product.wholesalePrice || product.price
           : product.retailPrice || product.price;
-      const grossRevenue = Number(sellingPrice || 0) * Number(quantity || 0);
+      const grossRevenue = Number(sellingPrice || 0) * normalizedQuantity;
       const normalizedDiscountType =
         discountType === "percent" ? "percent" : "fixed";
       const normalizedDiscountValue = Math.max(
@@ -94,7 +102,7 @@ export const createTransaction = async (req, res) => {
           : Math.min(normalizedDiscount, grossRevenue);
       const finalAmount = Math.max(grossRevenue - safeDiscount, 0);
       const unitProfit = sellingPrice - (product.purchasePrice || 0);
-      const totalProfit = unitProfit * quantity;
+      const totalProfit = unitProfit * normalizedQuantity;
 
       saleMetadata = {
         saleType: resolvedSaleType,
@@ -118,7 +126,7 @@ export const createTransaction = async (req, res) => {
           : "Walk-in Customer",
       purchasePrice: product.purchasePrice || 0,
       type,
-      quantity,
+      quantity: normalizedQuantity,
       reason,
       ...saleMetadata,
     });
@@ -131,7 +139,7 @@ export const createTransaction = async (req, res) => {
           legacyId: String(transaction._id),
           customerName: transaction.customerName,
           productName: product.name,
-          quantity,
+          quantity: normalizedQuantity,
           price: saleMetadata.sellingPrice,
           discount: saleMetadata.discount,
           discountType: saleMetadata.discountType || "fixed",

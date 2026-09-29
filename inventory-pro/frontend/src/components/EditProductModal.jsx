@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import { toast } from "react-toastify";
 
 export default function EditProductModal({ isOpen, onClose, product, onSave }) {
   const [form, setForm] = useState({
@@ -9,6 +10,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
     purchasePrice: "",
     retailPrice: "",
     wholesalePrice: "",
+    quantity: "",
     expiryDate: "",
     status: "Available",
   });
@@ -26,6 +28,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
         purchasePrice: product.purchasePrice ?? "",
         retailPrice: product.retailPrice ?? "",
         wholesalePrice: product.wholesalePrice ?? "",
+        quantity: product.quantity ?? "",
         expiryDate: expiryDateValue,
         status: product.status || "Available",
       });
@@ -37,6 +40,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
         purchasePrice: "",
         retailPrice: "",
         wholesalePrice: "",
+        quantity: "",
         expiryDate: "",
         status: "Available",
       });
@@ -52,6 +56,12 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const quantity = Number(form.quantity);
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      toast.error("Quantity must be greater than 0.");
+      return;
+    }
+
     onSave?.({
       id: form.id,
       name: form.name.trim(),
@@ -59,6 +69,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
       purchasePrice: Number(form.purchasePrice || 0),
       retailPrice: Number(form.retailPrice || 0),
       wholesalePrice: Number(form.wholesalePrice || 0),
+      quantity,
       expiryDate: form.expiryDate || null,
       status: form.status,
     });
@@ -149,6 +160,35 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
               step="0.01"
               value={form.wholesalePrice}
               onChange={handleFieldChange("wholesalePrice")}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-700">
+              Quantity
+            </label>
+            <input
+              type="number"
+              min="1"
+              step="1"
+              value={form.quantity}
+              onKeyDown={(event) => {
+                if (["-", "e", "E"].includes(event.key)) {
+                  event.preventDefault();
+                }
+              }}
+              onChange={(event) => {
+                const value = event.target.value;
+                if (value !== "" && Number(value) <= 0) {
+                  toast.error("Quantity must be greater than 0.");
+                }
+                setForm((current) => ({
+                  ...current,
+                  quantity:
+                    value === "" ? "" : Math.max(1, Math.abs(Number(value))),
+                }));
+              }}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
             />
           </div>

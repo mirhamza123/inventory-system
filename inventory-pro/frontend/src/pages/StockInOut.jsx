@@ -92,16 +92,20 @@ export default function StockInOut() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const requestedQty = Number(form.quantity);
+    if (!Number.isFinite(requestedQty) || requestedQty <= 0) {
+      toast.error("Quantity must be greater than 0.");
+      return;
+    }
 
     if (form.type === "stock-out") {
-      const requestedQty = Number(form.quantity || 0);
       if (!selectedProduct) {
         alert("Please select a product first.");
         return;
       }
 
-      if (!Number.isInteger(requestedQty) || requestedQty <= 0) {
-        alert("Please enter a valid quantity for the stock out.");
+      if (!Number.isInteger(requestedQty)) {
+        toast.error("Please enter a whole number quantity for stock out.");
         return;
       }
 
@@ -307,9 +311,26 @@ export default function StockInOut() {
               <input
                 className="w-full rounded border p-3"
                 type="number"
+                min="1"
+                step="1"
                 placeholder="Quantity"
                 value={form.quantity}
-                onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+                onKeyDown={(event) => {
+                  if (["-", "e", "E"].includes(event.key)) {
+                    event.preventDefault();
+                  }
+                }}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  if (value !== "" && Number(value) <= 0) {
+                    toast.error("Quantity must be greater than 0.");
+                  }
+                  setForm({
+                    ...form,
+                    quantity:
+                      value === "" ? "" : Math.max(1, Math.abs(Number(value))),
+                  });
+                }}
               />
               <input
                 className="w-full rounded border p-3"

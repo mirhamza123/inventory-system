@@ -241,7 +241,7 @@ export default function SupplierList() {
     }
 
     if (!Number.isFinite(quantity) || quantity <= 0) {
-      alert("Please enter a valid quantity.");
+      toast.error("Quantity must be greater than 0.");
       return;
     }
 
@@ -664,13 +664,24 @@ export default function SupplierList() {
               <input
                 type="number"
                 min="1"
+                step="1"
                 value={purchaseForm.quantity}
-                onChange={(event) =>
+                onKeyDown={(event) => {
+                  if (["-", "e", "E"].includes(event.key)) {
+                    event.preventDefault();
+                  }
+                }}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  if (value !== "" && Number(value) <= 0) {
+                    toast.error("Quantity must be greater than 0.");
+                  }
                   setPurchaseForm({
                     ...purchaseForm,
-                    quantity: event.target.value,
-                  })
-                }
+                    quantity:
+                      value === "" ? "" : Math.max(1, Math.abs(Number(value))),
+                  });
+                }}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-slate-400"
                 required
               />

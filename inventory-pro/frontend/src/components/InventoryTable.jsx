@@ -94,6 +94,7 @@ export default function InventoryTable({ initialProducts, onProductsChange }) {
         purchasePrice: Number(updatedProduct.purchasePrice || 0),
         retailPrice: Number(updatedProduct.retailPrice || 0),
         wholesalePrice: Number(updatedProduct.wholesalePrice || 0),
+        quantity: Number(updatedProduct.quantity),
         expiryDate: updatedProduct.expiryDate || null,
         status: updatedProduct.status,
       };

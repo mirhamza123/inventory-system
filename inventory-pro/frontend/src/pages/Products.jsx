@@ -155,13 +155,19 @@ export default function Products() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const quantity = Number(form.quantity);
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      toast.error("Quantity must be greater than 0.");
+      return;
+    }
+
     try {
       await api.post("/products", {
         ...form,
         purchasePrice: Number(form.purchasePrice),
         retailPrice: Number(form.retailPrice),
         wholesalePrice: Number(form.wholesalePrice),
-        quantity: Number(form.quantity),
+        quantity,
         expiryDate: form.expiryDate || null,
       });
       setForm({
@@ -372,9 +378,26 @@ export default function Products() {
               <input
                 className="w-full rounded border border-slate-200 p-3 text-sm"
                 type="number"
+                min="1"
+                step="1"
                 placeholder="Quantity"
                 value={form.quantity}
-                onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+                onKeyDown={(event) => {
+                  if (["-", "e", "E"].includes(event.key)) {
+                    event.preventDefault();
+                  }
+                }}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  if (value !== "" && Number(value) <= 0) {
+                    toast.error("Quantity must be greater than 0.");
+                  }
+                  setForm({
+                    ...form,
+                    quantity:
+                      value === "" ? "" : Math.max(1, Math.abs(Number(value))),
+                  });
+                }}
               />
               <input
                 className="w-full rounded border border-slate-200 p-3 text-sm"
