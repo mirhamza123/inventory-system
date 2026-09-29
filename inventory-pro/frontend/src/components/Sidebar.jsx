@@ -14,9 +14,9 @@ import api from "../utils/api";
 const navItems = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutGrid },
   { label: "Products", to: "/products", icon: FileText },
-  { label: "Suppliers", to: "/suppliers", icon: Truck },
   { label: "Stock In/Out", to: "/stock", icon: Repeat },
   { label: "Invoices", to: "/invoices", icon: FileText },
+  { label: "Suppliers", to: "/suppliers", icon: Truck },
   { label: "Alerts", to: "/alerts", icon: Bell },
 ];
 
