@@ -124,6 +124,11 @@ export default function Settings() {
 
       localStorage.setItem("storeName", nextStoreName);
       localStorage.setItem("currencySymbol", nextCurrencySymbol);
+      window.dispatchEvent(
+        new CustomEvent("store-name-updated", {
+          detail: { storeName: nextStoreName },
+        }),
+      );
 
       setMessage("Settings saved successfully.");
     } catch (requestError) {

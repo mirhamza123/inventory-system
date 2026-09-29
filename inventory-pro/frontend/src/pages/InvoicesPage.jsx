@@ -3,6 +3,7 @@ import html2pdf from "html2pdf.js";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import { useAuth } from "../context/AuthContext";
+import api from "../utils/api";
 
 const INVOICE_HISTORY_KEY = "invoiceHistory";
 
@@ -43,6 +44,9 @@ export default function InvoicesPage() {
   const [currencySymbol, setCurrencySymbol] = useState(
     () => localStorage.getItem("currencySymbol") || "$",
   );
+  const [storeName, setStoreName] = useState(
+    () => localStorage.getItem("storeName") || "InventoryPro",
+  );
   const { logout } = useAuth();
 
   const selectedInvoiceSubtotal = selectedInvoice
@@ -74,12 +78,35 @@ export default function InvoicesPage() {
     const syncCurrency = () => {
       setCurrencySymbol(localStorage.getItem("currencySymbol") || "$");
     };
+    const syncStoreName = (event) => {
+      setStoreName(
+        event?.detail?.storeName ||
+          localStorage.getItem("storeName") ||
+          "InventoryPro",
+      );
+    };
 
     syncCurrency();
+    syncStoreName();
     window.addEventListener("storage", syncCurrency);
+    window.addEventListener("storage", syncStoreName);
+    window.addEventListener("store-name-updated", syncStoreName);
+
+    api
+      .get("/settings")
+      .then((response) => {
+        const currentStoreName = response.data?.storeName || "InventoryPro";
+        localStorage.setItem("storeName", currentStoreName);
+        setStoreName(currentStoreName);
+      })
+      .catch((error) => {
+        console.error("Failed to load store name for invoice", error);
+      });
 
     return () => {
       window.removeEventListener("storage", syncCurrency);
+      window.removeEventListener("storage", syncStoreName);
+      window.removeEventListener("store-name-updated", syncStoreName);
     };
   }, []);
 
@@ -240,7 +267,7 @@ export default function InvoicesPage() {
                           letterSpacing: "-0.03em",
                         }}
                       >
-                        Mir Inventory Pro
+                        {storeName}
                       </div>
                       <div
                         style={{
