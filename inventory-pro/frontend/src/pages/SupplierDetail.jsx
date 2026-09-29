@@ -345,7 +345,7 @@ export default function SupplierDetail() {
                               <td className="px-6 py-4 text-sm text-slate-700">
                                 {formatCurrency(paid)}
                               </td>
-                              <td className="px-6 py-4 text-sm text-slate-700">
+                              <td className="px-6 py-4 text-sm font-semibold text-amber-700">
                                 {formatCurrency(payable)}
                               </td>
                               <td className="px-6 py-4 text-sm text-slate-700">
