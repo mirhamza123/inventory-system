@@ -13,6 +13,7 @@ import Modal from "../components/Modal";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../context/AuthContext";
 import api from "../utils/api";
+import { toast } from "react-toastify";
 
 const emptySupplierForm = {
   name: "",
@@ -188,8 +189,9 @@ export default function SupplierList() {
       setSupplierForm(emptySupplierForm);
       setIsSupplierModalOpen(false);
       await fetchSuppliers();
+      toast.success("Supplier added successfully!");
     } catch (error) {
-      alert(error.response?.data?.message || "Unable to add supplier");
+      toast.error(error.response?.data?.message || "Unable to add supplier");
     }
   };
 

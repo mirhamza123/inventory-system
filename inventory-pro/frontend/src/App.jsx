@@ -1,4 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import AlertsPage from "./pages/AlertsPage";
 import Dashboard from "./pages/Dashboard";
@@ -102,6 +104,7 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <AppRoutes />
+        <ToastContainer position="top-right" autoClose={3000} />
       </BrowserRouter>
     </AuthProvider>
   );

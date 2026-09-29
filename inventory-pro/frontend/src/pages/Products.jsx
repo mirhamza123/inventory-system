@@ -7,6 +7,7 @@ import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import Modal from "../components/Modal";
 import { exportStockReport } from "../utils/exportReports";
+import { toast } from "react-toastify";
 
 const getCurrencySymbol = () => localStorage.getItem("currencySymbol") || "$";
 
@@ -174,8 +175,9 @@ export default function Products() {
         expiryDate: "",
       });
       await fetchProducts();
+      toast.success("Product added successfully!");
     } catch (error) {
-      alert(error.response?.data?.message || "Unable to add product");
+      toast.error(error.response?.data?.message || "Unable to add product");
     }
   };
 

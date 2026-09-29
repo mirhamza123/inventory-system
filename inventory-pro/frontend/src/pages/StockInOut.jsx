@@ -4,6 +4,7 @@ import Topbar from "../components/Topbar";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import { exportSalesReport } from "../utils/exportReports";
+import { toast } from "react-toastify";
 
 const INVOICE_HISTORY_KEY = "invoiceHistory";
 
@@ -170,8 +171,15 @@ export default function StockInOut() {
         customerName: "",
       });
       fetchData();
+      toast.success(
+        form.type === "stock-out"
+          ? "Stock updated / removed successfully!"
+          : "Stock updated successfully!",
+      );
     } catch (error) {
-      alert(error.response?.data?.message || "Unable to save transaction.");
+      toast.error(
+        error.response?.data?.message || "Unable to save transaction.",
+      );
     }
   };
 

@@ -4,6 +4,7 @@ import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import { useAuth } from "../context/AuthContext";
 import api from "../utils/api";
+import { toast } from "react-toastify";
 
 const currencyOptions = [
   { code: "USD", symbol: "$" },
@@ -131,7 +132,11 @@ export default function Settings() {
       );
 
       setMessage("Settings saved successfully.");
+      toast.success("Settings saved successfully!");
     } catch (requestError) {
+      toast.error(
+        requestError.response?.data?.message || "Unable to save settings",
+      );
       setError(
         requestError.response?.data?.message || "Unable to save settings",
       );
