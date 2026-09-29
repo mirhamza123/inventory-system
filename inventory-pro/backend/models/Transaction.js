@@ -12,6 +12,7 @@ const transactionSchema = new mongoose.Schema(
     sellingPrice: { type: Number, min: 0, default: 0 },
     purchasePrice: { type: Number, min: 0, default: 0 },
     productName: { type: String, trim: true, default: "" },
+    customerName: { type: String, trim: true, default: "Walk-in Customer" },
     unitProfit: { type: Number, default: 0 },
     totalProfit: { type: Number, default: 0 },
     discountType: {

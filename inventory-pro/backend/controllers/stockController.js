@@ -1,6 +1,7 @@
 import Product from "../models/Product.js";
 import Supplier from "../models/Supplier.js";
 import Transaction from "../models/Transaction.js";
+import Invoice from "../models/Invoice.js";
 
 export const getTransactions = async (_req, res) => {
   try {
@@ -37,6 +38,7 @@ export const createTransaction = async (req, res) => {
       quantity,
       reason,
       saleType,
+      customerName,
       discount = 0,
       discountType = "fixed",
       discountValue = 0,
@@ -110,13 +112,45 @@ export const createTransaction = async (req, res) => {
       source: "stock-in-out",
       product: productId,
       productName: product.name,
+      customerName:
+        type === "stock-out"
+          ? String(customerName || "Walk-in Customer").trim()
+          : "Walk-in Customer",
       purchasePrice: product.purchasePrice || 0,
       type,
       quantity,
       reason,
       ...saleMetadata,
     });
-    res.status(201).json(transaction);
+
+    let invoice;
+    if (type === "stock-out") {
+      try {
+        invoice = await Invoice.create({
+          transaction: transaction._id,
+          legacyId: String(transaction._id),
+          customerName: transaction.customerName,
+          productName: product.name,
+          quantity,
+          price: saleMetadata.sellingPrice,
+          discount: saleMetadata.discount,
+          discountType: saleMetadata.discountType || "fixed",
+          discountValue: saleMetadata.discountValue || 0,
+          netTotal: saleMetadata.finalAmount,
+          createdAt: transaction.createdAt,
+        });
+      } catch (error) {
+        await Transaction.findByIdAndDelete(transaction._id);
+        product.quantity -= delta;
+        await product.save();
+        throw error;
+      }
+    }
+
+    res.status(201).json({
+      ...transaction.toObject(),
+      invoiceId: invoice?._id,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import html2pdf from "html2pdf.js";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
@@ -38,8 +38,54 @@ const getInvoiceHistory = () => {
   }
 };
 
+const toDateInputValue = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getQuickFilterRange = (filter) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (filter === "today") {
+    return {
+      startDate: toDateInputValue(today),
+      endDate: toDateInputValue(today),
+    };
+  }
+
+  if (filter === "thisWeek") {
+    const weekStart = new Date(today);
+    const daysSinceMonday = (weekStart.getDay() + 6) % 7;
+    weekStart.setDate(weekStart.getDate() - daysSinceMonday);
+    return {
+      startDate: toDateInputValue(weekStart),
+      endDate: toDateInputValue(today),
+    };
+  }
+
+  if (filter === "thisMonth") {
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    return {
+      startDate: toDateInputValue(monthStart),
+      endDate: toDateInputValue(today),
+    };
+  }
+
+  return { startDate: "", endDate: "" };
+};
+
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState([]);
+  const [totalInvoices, setTotalInvoices] = useState(0);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [quickFilter, setQuickFilter] = useState("allTime");
+  const [loadingInvoices, setLoadingInvoices] = useState(true);
+  const [invoiceError, setInvoiceError] = useState("");
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(
     () => localStorage.getItem("currencySymbol") || "$",
@@ -73,8 +119,6 @@ export default function InvoicesPage() {
         )}`;
 
   useEffect(() => {
-    setInvoices(getInvoiceHistory());
-
     const syncCurrency = () => {
       setCurrencySymbol(localStorage.getItem("currencySymbol") || "$");
     };
@@ -110,11 +154,57 @@ export default function InvoicesPage() {
     };
   }, []);
 
-  const totalRevenue = useMemo(
-    () =>
-      invoices.reduce((sum, invoice) => sum + Number(invoice.netTotal || 0), 0),
-    [invoices],
-  );
+  useEffect(() => {
+    let isCurrentRequest = true;
+    const selectedDates =
+      quickFilter === "custom"
+        ? { startDate, endDate }
+        : getQuickFilterRange(quickFilter);
+    const params = {};
+    if (selectedDates.startDate) params.startDate = selectedDates.startDate;
+    if (selectedDates.endDate) params.endDate = selectedDates.endDate;
+
+    const fetchInvoices = async () => {
+      setLoadingInvoices(true);
+      setInvoiceError("");
+
+      try {
+        const legacyInvoices = getInvoiceHistory();
+        if (legacyInvoices.length) {
+          await api.post("/invoices/import", { invoices: legacyInvoices });
+          localStorage.removeItem(INVOICE_HISTORY_KEY);
+        }
+
+        const response = await api.get("/invoices", { params });
+        if (!isCurrentRequest) return;
+
+        const data = response.data || {};
+        setInvoices(Array.isArray(data.invoices) ? data.invoices : []);
+        setTotalInvoices(Number(data.totalInvoices || 0));
+        setTotalRevenue(Number(data.totalRevenue || 0));
+      } catch (error) {
+        if (!isCurrentRequest) return;
+        setInvoices([]);
+        setTotalInvoices(0);
+        setTotalRevenue(0);
+        setInvoiceError(
+          error.response?.data?.message || "Unable to load invoices.",
+        );
+      } finally {
+        if (isCurrentRequest) setLoadingInvoices(false);
+      }
+    };
+
+    fetchInvoices();
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [startDate, endDate, quickFilter]);
+
+  const displayedDateRange =
+    quickFilter === "custom"
+      ? { startDate, endDate }
+      : getQuickFilterRange(quickFilter);
 
   const exportSingleInvoice = (invoice) => {
     const printable = document.getElementById("invoice-preview");
@@ -141,11 +231,69 @@ export default function InvoicesPage() {
       <main className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto p-6">
         <Topbar title="Bill History" />
 
+        <div className="mt-6 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 md:flex-row md:items-end">
+          <label className="flex min-w-[150px] flex-1 flex-col text-sm font-medium text-slate-600">
+            <span className="mb-1 font-semibold">Start Date</span>
+            <input
+              type="date"
+              value={displayedDateRange.startDate}
+              onChange={(event) => {
+                setStartDate(event.target.value);
+                setQuickFilter("custom");
+              }}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200"
+            />
+          </label>
+          <label className="flex min-w-[150px] flex-1 flex-col text-sm font-medium text-slate-600">
+            <span className="mb-1 font-semibold">End Date</span>
+            <input
+              type="date"
+              value={displayedDateRange.endDate}
+              onChange={(event) => {
+                setEndDate(event.target.value);
+                setQuickFilter("custom");
+              }}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200"
+            />
+          </label>
+          <label className="flex min-w-[170px] flex-1 flex-col text-sm font-medium text-slate-600">
+            <span className="mb-1 font-semibold">Quick Filter</span>
+            <select
+              value={quickFilter}
+              onChange={(event) => setQuickFilter(event.target.value)}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200"
+            >
+              <option value="today">Today</option>
+              <option value="thisWeek">This Week</option>
+              <option value="thisMonth">This Month</option>
+              <option value="allTime">All Time</option>
+              <option value="custom">Custom</option>
+            </select>
+          </label>
+          <button
+            type="button"
+            onClick={() => {
+              setStartDate("");
+              setEndDate("");
+              setQuickFilter("allTime");
+            }}
+            className="whitespace-nowrap rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+          >
+            Clear Filters
+          </button>
+        </div>
+
+        {invoiceError && (
+          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {invoiceError}
+          </div>
+        )}
+
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <div className="rounded-xl bg-white p-5 shadow-sm">
             <p className="text-sm text-slate-500">Total Invoices</p>
             <h3 className="mt-2 text-2xl font-bold text-slate-900">
-              {invoices.length}
+              {totalInvoices}
             </h3>
           </div>
           <div className="rounded-xl bg-white p-5 shadow-sm">
@@ -163,7 +311,11 @@ export default function InvoicesPage() {
         </div>
 
         <div className="mt-6 space-y-4">
-          {invoices.length === 0 ? (
+          {loadingInvoices ? (
+            <div className="rounded-xl bg-white p-6 text-sm text-slate-500 shadow-sm">
+              Loading invoices...
+            </div>
+          ) : invoices.length === 0 ? (
             <div className="rounded-xl bg-white p-6 text-sm text-slate-500 shadow-sm">
               No saved invoices yet. Stock out transactions will appear here
               after saving.

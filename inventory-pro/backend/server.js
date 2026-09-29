@@ -8,6 +8,7 @@ import stockRoutes from "./routes/stockRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
 import salesRoutes from "./routes/salesRoutes.js";
 import supplierRoutes from "./routes/supplierRoutes.js";
+import invoiceRoutes from "./routes/invoiceRoutes.js";
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use("/api/stock", stockRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/sales", salesRoutes);
 app.use("/api/suppliers", supplierRoutes);
+app.use("/api/invoices", invoiceRoutes);
 
 const startServer = (port = Number(process.env.PORT) || 5000, attempt = 1) => {
   const server = app.listen(port, () => {
