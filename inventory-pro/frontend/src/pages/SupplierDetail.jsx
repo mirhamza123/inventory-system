@@ -163,7 +163,7 @@ export default function SupplierDetail() {
             </div>
           ) : (
             <>
-              <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="mb-6 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
                 <div className="mb-5 flex items-center gap-4">
                   <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
                     <Building2 size={24} />
@@ -178,9 +178,9 @@ export default function SupplierDetail() {
                   </div>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-                  <div className="rounded-xl bg-slate-50 p-4">
-                    <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-4 transition-colors duration-200 hover:border-slate-200 hover:bg-slate-50">
+                    <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
                       <UserRound size={14} />
                       Supplier Name
                     </div>
@@ -189,8 +189,8 @@ export default function SupplierDetail() {
                     </div>
                   </div>
 
-                  <div className="rounded-xl bg-slate-50 p-4">
-                    <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-4 transition-colors duration-200 hover:border-slate-200 hover:bg-slate-50">
+                    <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
                       <Phone size={14} />
                       Phone
                     </div>
@@ -199,8 +199,8 @@ export default function SupplierDetail() {
                     </div>
                   </div>
 
-                  <div className="rounded-xl bg-slate-50 p-4">
-                    <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-4 transition-colors duration-200 hover:border-slate-200 hover:bg-slate-50">
+                    <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
                       <Mail size={14} />
                       Email
                     </div>
@@ -209,8 +209,8 @@ export default function SupplierDetail() {
                     </div>
                   </div>
 
-                  <div className="rounded-xl bg-slate-50 p-4 md:col-span-2 xl:col-span-2">
-                    <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-4 transition-colors duration-200 hover:border-slate-200 hover:bg-slate-50 md:col-span-2">
+                    <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
                       <MapPin size={14} />
                       Address
                     </div>
