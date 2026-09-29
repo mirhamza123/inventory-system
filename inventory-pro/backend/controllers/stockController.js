@@ -1,4 +1,5 @@
 import Product from "../models/Product.js";
+import Supplier from "../models/Supplier.js";
 import Transaction from "../models/Transaction.js";
 
 export const getTransactions = async (_req, res) => {
@@ -99,6 +100,41 @@ export const createTransaction = async (req, res) => {
       ...saleMetadata,
     });
     res.status(201).json(transaction);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const deleteTransaction = async (req, res) => {
+  try {
+    const transaction = await Transaction.findById(req.params.id);
+    if (!transaction) {
+      return res.status(404).json({ message: "Transaction not found" });
+    }
+
+    if (transaction.type === "stock-in" && transaction.supplier) {
+      const supplier = await Supplier.findById(transaction.supplier);
+      if (supplier) {
+        supplier.totalPurchased = Math.max(
+          Number(supplier.totalPurchased || 0) -
+            Number(transaction.totalAmount || 0),
+          0,
+        );
+        supplier.totalPaid = Math.max(
+          Number(supplier.totalPaid || 0) -
+            Number(transaction.amountPaidNow || 0),
+          0,
+        );
+        supplier.totalPayable = Math.max(
+          supplier.totalPurchased - supplier.totalPaid,
+          0,
+        );
+        await supplier.save();
+      }
+    }
+
+    await Transaction.findByIdAndDelete(req.params.id);
+    res.json({ message: "Purchase history deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

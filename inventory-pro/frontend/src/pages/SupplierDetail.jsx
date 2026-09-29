@@ -79,19 +79,25 @@ export default function SupplierDetail() {
     }
   }, [supplierId]);
 
+  const purchaseHistory = useMemo(
+    () =>
+      purchaseTransactions
+        .filter(
+          (transaction) =>
+            transaction?.type === "stock-in" &&
+            (String(transaction?.supplier || "") === String(supplierId) ||
+              String(transaction?.supplier?._id || "") === String(supplierId)),
+        )
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
+    [purchaseTransactions, supplierId],
+  );
+
   const purchaseQuantityByProduct = useMemo(() => {
     const totals = {};
 
-    purchaseTransactions.forEach((transaction) => {
-      const matchesSupplierId =
-        String(transaction?.supplier || "") === String(supplierId) ||
-        String(transaction?.supplier?._id || "") === String(supplierId);
-      const isPurchaseRecord = transaction?.type === "stock-in";
+    purchaseHistory.forEach((transaction) => {
       const productId = transaction?.product?._id || transaction?.product || "";
-
-      if (!matchesSupplierId || !isPurchaseRecord || !productId) {
-        return;
-      }
+      if (!productId) return;
 
       const normalizedProductId = String(productId);
       totals[normalizedProductId] =
@@ -100,12 +106,34 @@ export default function SupplierDetail() {
     });
 
     return totals;
-  }, [purchaseTransactions, supplierId]);
+  }, [purchaseHistory]);
 
   const supplierProducts = useMemo(
     () => products.filter((product) => matchesSupplier(product, supplierId)),
     [products, supplierId],
   );
+
+  const handleDeletePurchaseHistory = async (transactionId) => {
+    const confirmed = window.confirm(
+      "Delete this supplier purchase history entry? This will also update the supplier balances.",
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await api.delete(`/stock/${transactionId}`);
+      const refreshed = await api.get("/stock");
+      setPurchaseTransactions(
+        Array.isArray(refreshed.data) ? refreshed.data : [],
+      );
+      const supplierResponse = await api.get(`/suppliers/${supplierId}`);
+      setSupplier(supplierResponse.data || null);
+    } catch (error) {
+      alert(
+        error.response?.data?.message || "Unable to delete purchase history.",
+      );
+    }
+  };
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#f3f4f2] font-sans text-slate-900">
@@ -193,7 +221,7 @@ export default function SupplierDetail() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="mb-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
                 <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
                   <h3 className="text-lg font-bold text-slate-900">
                     Products from this supplier
@@ -252,6 +280,91 @@ export default function SupplierDetail() {
                                       product.expiryDate,
                                     ).toLocaleDateString()
                                   : "No expiry"}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+                  <h3 className="text-lg font-bold text-slate-900">
+                    Purchase history
+                  </h3>
+                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                    {purchaseHistory.length} entry
+                    {purchaseHistory.length === 1 ? "" : "ies"}
+                  </span>
+                </div>
+
+                {purchaseHistory.length === 0 ? (
+                  <div className="px-6 py-10 text-center text-sm text-slate-500">
+                    No purchase history available for this supplier.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[760px]">
+                      <thead>
+                        <tr className="bg-slate-50 text-left text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                          <th className="px-6 py-3">Product</th>
+                          <th className="px-6 py-3">Quantity</th>
+                          <th className="px-6 py-3">Unit Cost</th>
+                          <th className="px-6 py-3">Paid</th>
+                          <th className="px-6 py-3">Payable</th>
+                          <th className="px-6 py-3">Date</th>
+                          <th className="px-6 py-3">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {purchaseHistory.map((transaction) => {
+                          const unitCost = Number(
+                            transaction.purchasePrice || 0,
+                          );
+                          const quantity = Number(transaction.quantity || 0);
+                          const paid = Number(transaction.amountPaidNow || 0);
+                          const payable = quantity * unitCost - paid;
+
+                          return (
+                            <tr
+                              key={transaction._id || transaction.id}
+                              className="border-t border-slate-100"
+                            >
+                              <td className="px-6 py-4 text-sm font-semibold text-slate-800">
+                                {transaction.productName || "Supplier purchase"}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-slate-700">
+                                {quantity}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-slate-700">
+                                {formatCurrency(unitCost)}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-slate-700">
+                                {formatCurrency(paid)}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-slate-700">
+                                {formatCurrency(payable)}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-slate-700">
+                                {transaction.createdAt
+                                  ? new Date(
+                                      transaction.createdAt,
+                                    ).toLocaleDateString()
+                                  : "-"}
+                              </td>
+                              <td className="px-6 py-4">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleDeletePurchaseHistory(transaction._id)
+                                  }
+                                  className="rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+                                >
+                                  Delete
+                                </button>
                               </td>
                             </tr>
                           );

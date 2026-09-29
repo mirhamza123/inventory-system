@@ -5,6 +5,7 @@ import {
   CircleDollarSign,
   Plus,
   ReceiptText,
+  Trash2,
   Truck,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -43,6 +44,7 @@ export default function SupplierList() {
   const [purchaseForm, setPurchaseForm] = useState(emptyPurchaseForm);
   const [isSupplierModalOpen, setIsSupplierModalOpen] = useState(false);
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+  const [deletingSupplierId, setDeletingSupplierId] = useState("");
   const [loading, setLoading] = useState(true);
   const { logout } = useAuth();
 
@@ -119,6 +121,25 @@ export default function SupplierList() {
       supplierId: supplier._id || supplier.id,
     });
     setIsPurchaseModalOpen(true);
+  };
+
+  const handleDeleteSupplier = async (supplier) => {
+    const supplierId = supplier._id || supplier.id;
+    const confirmed = window.confirm(
+      `Delete supplier "${supplier.name}"? Existing purchase history will be retained.`,
+    );
+
+    if (!confirmed) return;
+
+    setDeletingSupplierId(supplierId);
+    try {
+      await api.delete(`/suppliers/${supplierId}`);
+      await fetchSuppliers();
+    } catch (error) {
+      alert(error.response?.data?.message || "Unable to delete supplier");
+    } finally {
+      setDeletingSupplierId("");
+    }
   };
 
   const selectedProduct = products.find(
@@ -301,6 +322,21 @@ export default function SupplierList() {
                             >
                               <ReceiptText size={12} />
                               Record Purchase
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteSupplier(supplier)}
+                              disabled={
+                                deletingSupplierId ===
+                                (supplier._id || supplier.id)
+                              }
+                              className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              <Trash2 size={12} />
+                              {deletingSupplierId ===
+                              (supplier._id || supplier.id)
+                                ? "Deleting..."
+                                : "Delete"}
                             </button>
                           </div>
                         </td>
