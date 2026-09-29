@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import html2pdf from "html2pdf.js";
+import { Trash2 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import { useAuth } from "../context/AuthContext";
@@ -85,6 +86,7 @@ export default function InvoicesPage() {
   const [endDate, setEndDate] = useState("");
   const [quickFilter, setQuickFilter] = useState("allTime");
   const [loadingInvoices, setLoadingInvoices] = useState(true);
+  const [deletingInvoiceId, setDeletingInvoiceId] = useState("");
   const [invoiceError, setInvoiceError] = useState("");
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(
@@ -222,6 +224,35 @@ export default function InvoicesPage() {
       .save();
   };
 
+  const handleDeleteInvoice = async (invoice) => {
+    const confirmed = window.confirm(
+      `Delete invoice #${invoice.id}? This action cannot be undone.`,
+    );
+    if (!confirmed) return;
+
+    setDeletingInvoiceId(invoice._id);
+    setInvoiceError("");
+    try {
+      await api.delete(`/invoices/${invoice._id}`);
+      setInvoices((current) =>
+        current.filter((item) => item._id !== invoice._id),
+      );
+      setTotalInvoices((current) => Math.max(current - 1, 0));
+      setTotalRevenue((current) =>
+        Math.max(current - Number(invoice.netTotal || 0), 0),
+      );
+      setSelectedInvoice((current) =>
+        current?._id === invoice._id ? null : current,
+      );
+    } catch (error) {
+      setInvoiceError(
+        error.response?.data?.message || "Unable to delete invoice.",
+      );
+    } finally {
+      setDeletingInvoiceId("");
+    }
+  };
+
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-100">
       <div className="h-screen flex-shrink-0 overflow-hidden">
@@ -340,7 +371,7 @@ export default function InvoicesPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     <div className="text-right">
                       <div className="text-xs uppercase tracking-[0.12em] text-slate-400">
                         Net total
@@ -356,6 +387,17 @@ export default function InvoicesPage() {
                       className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
                     >
                       Download / Print
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteInvoice(invoice)}
+                      disabled={deletingInvoiceId === invoice._id}
+                      className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <Trash2 size={15} />
+                      {deletingInvoiceId === invoice._id
+                        ? "Deleting..."
+                        : "Delete"}
                     </button>
                   </div>
                 </div>
