@@ -15,6 +15,105 @@ export const getSuppliers = async (_req, res) => {
   }
 };
 
+export const getSupplierSummary = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    const parseDate = (value) => {
+      if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        return null;
+      }
+
+      const date = new Date(`${value}T00:00:00.000Z`);
+      return !Number.isNaN(date.getTime()) &&
+        date.toISOString().slice(0, 10) === value
+        ? date
+        : null;
+    };
+
+    const parsedStart = startDate ? parseDate(startDate) : null;
+    const parsedEnd = endDate ? parseDate(endDate) : null;
+
+    if ((startDate && !parsedStart) || (endDate && !parsedEnd)) {
+      return res
+        .status(400)
+        .json({ message: "Dates must use YYYY-MM-DD format" });
+    }
+
+    if (parsedStart && parsedEnd && parsedStart > parsedEnd) {
+      return res
+        .status(400)
+        .json({ message: "Start date must be before end date" });
+    }
+
+    const match = { type: "stock-in", supplier: { $ne: null } };
+    if (parsedStart || parsedEnd) {
+      match.createdAt = {};
+      if (parsedStart) match.createdAt.$gte = parsedStart;
+      if (parsedEnd) {
+        const endExclusive = new Date(parsedEnd);
+        endExclusive.setUTCDate(endExclusive.getUTCDate() + 1);
+        match.createdAt.$lt = endExclusive;
+      }
+    }
+
+    const amountExpression = {
+      $ifNull: [
+        "$totalAmount",
+        {
+          $multiply: [
+            { $ifNull: ["$purchasePrice", 0] },
+            { $ifNull: ["$quantity", 0] },
+          ],
+        },
+      ],
+    };
+    const [summary] = await Transaction.aggregate([
+      { $match: match },
+      {
+        $lookup: {
+          from: Supplier.collection.name,
+          localField: "supplier",
+          foreignField: "_id",
+          as: "supplierRecord",
+        },
+      },
+      { $unwind: "$supplierRecord" },
+      { $match: { "supplierRecord.isDeleted": { $ne: true } } },
+      {
+        $group: {
+          _id: null,
+          totalPurchased: { $sum: amountExpression },
+          totalPayable: {
+            $sum: {
+              $ifNull: [
+                "$payableAmount",
+                {
+                  $max: [
+                    {
+                      $subtract: [
+                        amountExpression,
+                        { $ifNull: ["$amountPaidNow", 0] },
+                      ],
+                    },
+                    0,
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      },
+    ]);
+
+    res.json({
+      totalPurchased: summary?.totalPurchased || 0,
+      totalPayable: summary?.totalPayable || 0,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const getSupplierById = async (req, res) => {
   try {
     const supplier = await Supplier.findOne({

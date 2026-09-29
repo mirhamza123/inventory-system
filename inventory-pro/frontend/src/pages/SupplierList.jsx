@@ -29,6 +29,52 @@ const emptyPurchaseForm = {
   amountPaidNow: "",
 };
 
+const formatDateInput = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getQuickFilterDates = (filter) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  switch (filter) {
+    case "today":
+      return {
+        startDate: formatDateInput(today),
+        endDate: formatDateInput(today),
+      };
+    case "yesterday": {
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      return {
+        startDate: formatDateInput(yesterday),
+        endDate: formatDateInput(yesterday),
+      };
+    }
+    case "last7days": {
+      const start = new Date(today);
+      start.setDate(start.getDate() - 6);
+      return {
+        startDate: formatDateInput(start),
+        endDate: formatDateInput(today),
+      };
+    }
+    case "lastmonth": {
+      const start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const end = new Date(today.getFullYear(), today.getMonth(), 0);
+      return {
+        startDate: formatDateInput(start),
+        endDate: formatDateInput(end),
+      };
+    }
+    default:
+      return { startDate: "", endDate: "" };
+  }
+};
+
 const formatCurrency = (value) => {
   const currencySymbol = localStorage.getItem("currencySymbol") || "$";
   return `${currencySymbol}${Number(value || 0).toLocaleString(undefined, {
@@ -45,6 +91,14 @@ export default function SupplierList() {
   const [isSupplierModalOpen, setIsSupplierModalOpen] = useState(false);
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [deletingSupplierId, setDeletingSupplierId] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [timeRange, setTimeRange] = useState("alltime");
+  const [summaryRefreshKey, setSummaryRefreshKey] = useState(0);
+  const [supplierSummary, setSupplierSummary] = useState({
+    totalPurchased: 0,
+    totalPayable: 0,
+  });
   const [loading, setLoading] = useState(true);
   const { logout } = useAuth();
 
@@ -78,22 +132,44 @@ export default function SupplierList() {
     loadData();
   }, []);
 
-  const summary = useMemo(() => {
-    const totalPurchased = suppliers.reduce(
-      (sum, supplier) => sum + Number(supplier.totalPurchased || 0),
-      0,
-    );
-    const totalPayable = suppliers.reduce(
-      (sum, supplier) => sum + Number(supplier.totalPayable || 0),
-      0,
-    );
+  useEffect(() => {
+    let isCurrentRequest = true;
+    const selectedDates =
+      timeRange === "custom"
+        ? { startDate, endDate }
+        : getQuickFilterDates(timeRange);
+    const params = {};
 
+    if (selectedDates.startDate) params.startDate = selectedDates.startDate;
+    if (selectedDates.endDate) params.endDate = selectedDates.endDate;
+
+    const fetchSummary = async () => {
+      try {
+        const response = await api.get("/suppliers/summary", { params });
+        if (isCurrentRequest) {
+          setSupplierSummary({
+            totalPurchased: Number(response.data?.totalPurchased || 0),
+            totalPayable: Number(response.data?.totalPayable || 0),
+          });
+        }
+      } catch (error) {
+        console.error("Failed to load supplier summary", error);
+      }
+    };
+
+    fetchSummary();
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [startDate, endDate, timeRange, summaryRefreshKey]);
+
+  const summary = useMemo(() => {
     return {
       count: suppliers.length,
-      totalPurchased,
-      totalPayable,
+      totalPurchased: supplierSummary.totalPurchased,
+      totalPayable: supplierSummary.totalPayable,
     };
-  }, [suppliers]);
+  }, [suppliers.length, supplierSummary]);
 
   const handleCreateSupplier = async (event) => {
     event.preventDefault();
@@ -135,6 +211,7 @@ export default function SupplierList() {
     try {
       await api.delete(`/suppliers/${supplierId}`);
       await fetchSuppliers();
+      setSummaryRefreshKey((current) => current + 1);
     } catch (error) {
       alert(error.response?.data?.message || "Unable to delete supplier");
     } finally {
@@ -181,6 +258,7 @@ export default function SupplierList() {
       setPurchaseForm(emptyPurchaseForm);
       setIsPurchaseModalOpen(false);
       await Promise.all([fetchSuppliers(), fetchProducts()]);
+      setSummaryRefreshKey((current) => current + 1);
     } catch (error) {
       alert(error.response?.data?.message || "Unable to record purchase");
     }
@@ -210,6 +288,67 @@ export default function SupplierList() {
             >
               <Plus size={16} />
               Add Supplier
+            </button>
+          </div>
+
+          <div className="mb-6 flex flex-col gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 md:flex-row md:items-end">
+            <label className="flex min-w-[150px] flex-1 flex-col text-sm font-medium text-slate-600">
+              <span className="mb-1 font-semibold">Start Date</span>
+              <input
+                type="date"
+                value={
+                  timeRange === "custom"
+                    ? startDate
+                    : getQuickFilterDates(timeRange).startDate
+                }
+                onChange={(event) => {
+                  setStartDate(event.target.value);
+                  setTimeRange("custom");
+                }}
+                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200"
+              />
+            </label>
+            <label className="flex min-w-[150px] flex-1 flex-col text-sm font-medium text-slate-600">
+              <span className="mb-1 font-semibold">End Date</span>
+              <input
+                type="date"
+                value={
+                  timeRange === "custom"
+                    ? endDate
+                    : getQuickFilterDates(timeRange).endDate
+                }
+                onChange={(event) => {
+                  setEndDate(event.target.value);
+                  setTimeRange("custom");
+                }}
+                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200"
+              />
+            </label>
+            <label className="flex min-w-[170px] flex-1 flex-col text-sm font-medium text-slate-600">
+              <span className="mb-1 font-semibold">Quick Filter</span>
+              <select
+                value={timeRange}
+                onChange={(event) => setTimeRange(event.target.value)}
+                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200"
+              >
+                <option value="today">Today</option>
+                <option value="yesterday">Yesterday</option>
+                <option value="last7days">Last 7 Days</option>
+                <option value="lastmonth">Last Month</option>
+                <option value="alltime">All Time</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+            <button
+              type="button"
+              onClick={() => {
+                setStartDate("");
+                setEndDate("");
+                setTimeRange("alltime");
+              }}
+              className="whitespace-nowrap rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100"
+            >
+              Clear Filters
             </button>
           </div>
 
