@@ -18,9 +18,9 @@ const filterActivitiesByDateRange = (activities, startDate, endDate) => {
     }
 
     const normalizedStart = startDate
-      ? new Date(`${startDate}T00:00:00`)
+      ? new Date(`${startDate}T00:00:00.000`)
       : null;
-    const normalizedEnd = endDate ? new Date(`${endDate}T23:59:59`) : null;
+    const normalizedEnd = endDate ? new Date(`${endDate}T23:59:59.999`) : null;
 
     if (normalizedStart && activityTime < normalizedStart) {
       return false;
@@ -174,7 +174,7 @@ export default function Dashboard() {
   const activeDateRange = useMemo(() => {
     if (startDate && endDate) {
       const start = new Date(`${startDate}T00:00:00`);
-      const end = new Date(`${endDate}T23:59:59`);
+      const end = new Date(`${endDate}T23:59:59.999`);
       return { startDate: start, endDate: end };
     }
 
@@ -312,7 +312,8 @@ export default function Dashboard() {
 
         // Map Stock In/Out activity logs into the UI-friendly shape
         const mapped = activityLogs.map((t) => ({
-          date: new Date(t.createdAt).toLocaleString(),
+          id: t._id,
+          date: t.createdAt,
           product: t.product?.name || "Product",
           action: t.type === "stock-in" ? "Stock In" : "Stock Out",
           qty: (t.type === "stock-in" ? "+" : "-") + t.quantity,
@@ -618,8 +619,10 @@ export default function Dashboard() {
                   </tr>
                 ) : (
                   filteredActivities.map((a, i) => (
-                    <tr key={i} className="odd:bg-white even:bg-white">
-                      <td className="px-5 py-4 align-top">{a.date}</td>
+                    <tr key={a.id || i} className="odd:bg-white even:bg-white">
+                      <td className="px-5 py-4 align-top">
+                        {new Date(a.date).toLocaleString()}
+                      </td>
                       <td className="px-5 py-4 align-top">{a.product}</td>
                       <td
                         className={`px-5 py-4 align-top ${a.dir === "in" ? "text-[#2e9e5b] font-semibold" : "text-[#d43d3d] font-semibold"}`}
@@ -775,11 +778,11 @@ export default function Dashboard() {
                   ) : (
                     historyActivities.map((activity, index) => (
                       <tr
-                        key={`${activity.date}-${index}`}
+                        key={activity.id || `${activity.date}-${index}`}
                         className="odd:bg-white even:bg-[#f9fafb]"
                       >
                         <td className="px-3 py-3 align-top text-sm text-slate-700">
-                          {activity.date}
+                          {new Date(activity.date).toLocaleString()}
                         </td>
                         <td className="px-3 py-3 align-top text-sm text-slate-700">
                           {activity.product}

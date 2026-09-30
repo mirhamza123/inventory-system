@@ -14,14 +14,41 @@ export const getTransactions = async (_req, res) => {
   }
 };
 
-export const getStockActivities = async (_req, res) => {
+export const getStockActivities = async (req, res) => {
   try {
-    const activities = await Transaction.find({
+    const { startDate, endDate, showAllHistory } = req.query;
+    const filter = {
       $or: [
         { source: "stock-in-out" },
         { source: { $exists: false }, supplier: null },
       ],
-    })
+    };
+
+    if (!["true", "1"].includes(String(showAllHistory).toLowerCase())) {
+      if (startDate || endDate) {
+        filter.createdAt = {};
+      }
+
+      if (startDate) {
+        const parsedStart = new Date(startDate);
+        if (Number.isNaN(parsedStart.getTime())) {
+          return res.status(400).json({ message: "Invalid startDate" });
+        }
+        parsedStart.setHours(0, 0, 0, 0);
+        filter.createdAt.$gte = parsedStart;
+      }
+
+      if (endDate) {
+        const parsedEnd = new Date(endDate);
+        if (Number.isNaN(parsedEnd.getTime())) {
+          return res.status(400).json({ message: "Invalid endDate" });
+        }
+        parsedEnd.setHours(23, 59, 59, 999);
+        filter.createdAt.$lte = parsedEnd;
+      }
+    }
+
+    const activities = await Transaction.find(filter)
       .populate("product")
       .sort({ createdAt: -1 });
     res.json(activities);
