@@ -110,9 +110,12 @@ export default function Settings() {
       const normalizedCurrencySymbol = getDisplayCurrencySymbol(
         form.currencySymbol || "$",
       );
+      const storeAddress = String(form.storeAddress || "").trim();
 
       const payload = {
         ...form,
+        storeAddress,
+        address: storeAddress,
         currency: form.currency || "USD",
         currencySymbol: normalizedCurrencySymbol,
       };
