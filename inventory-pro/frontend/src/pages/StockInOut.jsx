@@ -73,6 +73,35 @@ export default function StockInOut() {
     setTransactions(transactionsRes.data);
   };
 
+  const handleExportSales = async () => {
+    try {
+      const params = {};
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
+
+      let response;
+      let applyDateRange = false;
+
+      try {
+        response = await api.get("/sales/export", { params });
+      } catch (error) {
+        if (error.response?.status !== 404) throw error;
+        response = await api.get("/stock");
+        applyDateRange = true;
+      }
+
+      exportSalesReport(
+        Array.isArray(response.data) ? response.data : [],
+        applyDateRange ? startDate : "",
+        applyDateRange ? endDate : "",
+      );
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Unable to export sales report.",
+      );
+    }
+  };
+
   useEffect(() => {
     const syncCurrency = () => {
       setCurrencySymbol(localStorage.getItem("currencySymbol") || "$");
@@ -216,9 +245,7 @@ export default function StockInOut() {
             </label>
             <button
               type="button"
-              onClick={() =>
-                exportSalesReport(transactions, startDate, endDate)
-              }
+              onClick={handleExportSales}
               className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               Export sales

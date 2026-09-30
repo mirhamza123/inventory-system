@@ -2,6 +2,43 @@ import mongoose from "mongoose";
 import Product from "../models/Product.js";
 import Transaction from "../models/Transaction.js";
 
+export const exportSales = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    const filter = { type: "stock-out" };
+
+    if (startDate || endDate) {
+      filter.createdAt = {};
+    }
+
+    if (startDate) {
+      const parsedStart = new Date(startDate);
+      if (Number.isNaN(parsedStart.getTime())) {
+        return res.status(400).json({ message: "Invalid startDate" });
+      }
+      parsedStart.setHours(0, 0, 0, 0);
+      filter.createdAt.$gte = parsedStart;
+    }
+
+    if (endDate) {
+      const parsedEnd = new Date(endDate);
+      if (Number.isNaN(parsedEnd.getTime())) {
+        return res.status(400).json({ message: "Invalid endDate" });
+      }
+      parsedEnd.setHours(23, 59, 59, 999);
+      filter.createdAt.$lte = parsedEnd;
+    }
+
+    const transactions = await Transaction.find(filter)
+      .populate("product")
+      .sort({ createdAt: -1 });
+
+    res.json(transactions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const createSale = async (req, res) => {
   const { items, paymentMethod = "cash" } = req.body;
 
@@ -25,11 +62,9 @@ export const createSale = async (req, res) => {
         item.quantity < 1,
     )
   ) {
-    return res
-      .status(400)
-      .json({
-        message: "Each item needs a valid product and positive quantity",
-      });
+    return res.status(400).json({
+      message: "Each item needs a valid product and positive quantity",
+    });
   }
 
   const quantitiesByProduct = normalizedItems.reduce((result, item) => {
