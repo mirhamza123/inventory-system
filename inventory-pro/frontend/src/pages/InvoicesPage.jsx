@@ -4,7 +4,7 @@ import { Trash2 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import { useAuth } from "../context/AuthContext";
-import api from "../utils/api";
+import api, { getStoreSettings } from "../utils/api";
 
 const INVOICE_HISTORY_KEY = "invoiceHistory";
 
@@ -95,6 +95,7 @@ export default function InvoicesPage() {
   const [storeName, setStoreName] = useState(
     () => localStorage.getItem("storeName") || "InventoryPro",
   );
+  const [storeAddress, setStoreAddress] = useState("");
   const { logout } = useAuth();
 
   const selectedInvoiceSubtotal = selectedInvoice
@@ -138,12 +139,16 @@ export default function InvoicesPage() {
     window.addEventListener("storage", syncStoreName);
     window.addEventListener("store-name-updated", syncStoreName);
 
-    api
-      .get("/settings")
+    getStoreSettings()
       .then((response) => {
         const currentStoreName = response.data?.storeName || "InventoryPro";
         localStorage.setItem("storeName", currentStoreName);
         setStoreName(currentStoreName);
+        setStoreAddress(
+          String(
+            response.data?.storeAddress || response.data?.address || "",
+          ).trim(),
+        );
       })
       .catch((error) => {
         console.error("Failed to load store name for invoice", error);
@@ -741,18 +746,21 @@ export default function InvoicesPage() {
                   </div>
                 </div>
 
-                <div
-                  style={{
-                    textAlign: "center",
-                    padding: "22px 20px 24px",
-                    borderTop: "1px solid #e2e8f0",
-                    background: "#f8fafc",
-                    color: "#475569",
-                    fontSize: "13px",
-                  }}
-                >
-                  Thank you for your business! For queries, contact support.
-                </div>
+                {storeAddress && (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: "22px 20px 24px",
+                      borderTop: "1px solid #e2e8f0",
+                      background: "#f8fafc",
+                      color: "#475569",
+                      fontSize: "13px",
+                      whiteSpace: "pre-line",
+                    }}
+                  >
+                    {storeAddress}
+                  </div>
+                )}
               </div>
 
               <div className="mt-5 flex justify-end">

@@ -13,4 +13,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+export const getStoreSettings = () => api.get("/settings");
+export const updateStoreSettings = (settings) => api.put("/settings", settings);
+
 export default api;

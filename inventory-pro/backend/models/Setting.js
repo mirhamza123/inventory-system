@@ -8,6 +8,8 @@ const settingSchema = new mongoose.Schema(
       trim: true,
       default: "InventoryPro",
     },
+    storeAddress: { type: String, trim: true, default: "" },
+    currencyCode: { type: String, trim: true, default: "USD" },
     currency: { type: String, required: true, trim: true, default: "USD" },
     currencySymbol: { type: String, trim: true, default: "$" },
     taxRate: { type: Number, min: 0, max: 100, default: 0 },

@@ -2,6 +2,8 @@ import Setting from "../models/Setting.js";
 
 const defaultSettings = {
   storeName: "InventoryPro",
+  storeAddress: "",
+  currencyCode: "USD",
   currency: "USD",
   currencySymbol: "$",
   taxRate: 0,
@@ -26,7 +28,12 @@ const currencySymbols = {
 export const getSettings = async (_req, res) => {
   try {
     const settings = await Setting.findOne().sort({ createdAt: 1 });
-    res.json(settings || defaultSettings);
+    if (!settings) return res.json(defaultSettings);
+
+    const data = settings.toObject();
+    data.storeAddress = data.storeAddress || data.address || "";
+    data.currencyCode = data.currencyCode || data.currency || "USD";
+    res.json(data);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -34,10 +41,21 @@ export const getSettings = async (_req, res) => {
 
 export const updateSettings = async (req, res) => {
   try {
-    const { storeName, currency, currencySymbol, taxRate, address, logoUrl } =
-      req.body;
+    const {
+      storeName,
+      currencyCode,
+      currency,
+      currencySymbol,
+      taxRate,
+      storeAddress,
+      address,
+      logoUrl,
+    } = req.body;
     const parsedTaxRate = Number(taxRate);
-    const normalizedCurrency = (currency || "USD").trim().toUpperCase();
+    const normalizedCurrency = (currencyCode || currency || "USD")
+      .trim()
+      .toUpperCase();
+    const normalizedAddress = (storeAddress ?? address ?? "").trim();
     const resolvedSymbol =
       (currencySymbol || currencySymbols[normalizedCurrency] || "$").trim() ||
       "$";
@@ -62,10 +80,12 @@ export const updateSettings = async (req, res) => {
       {},
       {
         storeName: storeName.trim(),
+        storeAddress: normalizedAddress,
+        currencyCode: normalizedCurrency,
         currency: normalizedCurrency,
         currencySymbol: resolvedSymbol,
         taxRate: parsedTaxRate,
-        address: address?.trim() || "",
+        address: normalizedAddress,
         logoUrl: logoUrl?.trim() || "",
       },
       {

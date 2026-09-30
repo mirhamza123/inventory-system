@@ -3,7 +3,7 @@ import { Save } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import { useAuth } from "../context/AuthContext";
-import api from "../utils/api";
+import api, { getStoreSettings, updateStoreSettings } from "../utils/api";
 import { toast } from "react-toastify";
 
 const currencyOptions = [
@@ -24,7 +24,7 @@ const initialForm = {
   storeName: "",
   currency: "USD",
   currencySymbol: "$",
-  address: "",
+  storeAddress: "",
 };
 
 const initialPasswordForm = {
@@ -62,9 +62,10 @@ export default function Settings() {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const response = await api.get("/settings");
+        const response = await getStoreSettings();
         const settings = response.data || {};
-        const currencyCode = settings.currency || "USD";
+        const currencyCode =
+          settings.currencyCode || settings.currency || "USD";
         const matchedCurrency =
           currencyOptions.find((option) => option.code === currencyCode) ||
           currencyOptions[0];
@@ -72,6 +73,7 @@ export default function Settings() {
         const nextForm = {
           ...initialForm,
           ...settings,
+          storeAddress: settings.storeAddress || settings.address || "",
           currency: currencyCode,
           currencySymbol: getDisplayCurrencySymbol(
             settings.currencySymbol || matchedCurrency.symbol,
@@ -115,7 +117,10 @@ export default function Settings() {
         currencySymbol: normalizedCurrencySymbol,
       };
 
-      const response = await api.put("/settings", payload);
+      const response = await updateStoreSettings({
+        ...payload,
+        currencyCode: payload.currency,
+      });
 
       const nextStoreName =
         response.data?.storeName || form.storeName || "InventoryPro";
@@ -290,8 +295,8 @@ export default function Settings() {
                       <textarea
                         rows="3"
                         disabled={!canEdit}
-                        value={form.address}
-                        onChange={updateField("address")}
+                        value={form.storeAddress}
+                        onChange={updateField("storeAddress")}
                         className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 outline-none focus:border-slate-400 disabled:bg-slate-100"
                       />
                     </label>
