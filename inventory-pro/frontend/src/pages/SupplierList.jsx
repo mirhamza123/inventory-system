@@ -250,6 +250,16 @@ export default function SupplierList() {
       return;
     }
 
+    if (!Number.isFinite(amountPaidNow) || amountPaidNow < 0) {
+      toast.error("Amount paid must be zero or greater.");
+      return;
+    }
+
+    if (amountPaidNow > totalAmount) {
+      toast.error("Amount paid cannot exceed the total amount.");
+      return;
+    }
+
     try {
       await api.post("/suppliers/purchases", {
         supplierId: purchaseForm.supplierId,
@@ -663,25 +673,20 @@ export default function SupplierList() {
               </label>
               <input
                 type="number"
-                min="1"
-                step="1"
+                min="0"
+                step="any"
                 value={purchaseForm.quantity}
                 onKeyDown={(event) => {
                   if (["-", "e", "E"].includes(event.key)) {
                     event.preventDefault();
                   }
                 }}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  if (value !== "" && Number(value) <= 0) {
-                    toast.error("Quantity must be greater than 0.");
-                  }
+                onChange={(event) =>
                   setPurchaseForm({
                     ...purchaseForm,
-                    quantity:
-                      value === "" ? "" : Math.max(1, Math.abs(Number(value))),
-                  });
-                }}
+                    quantity: Math.max(0, parseFloat(event.target.value) || 0),
+                  })
+                }
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-slate-400"
                 required
               />
@@ -694,12 +699,12 @@ export default function SupplierList() {
               <input
                 type="number"
                 min="0"
-                step="0.01"
+                step="any"
                 value={purchaseForm.unitCost}
                 onChange={(event) =>
                   setPurchaseForm({
                     ...purchaseForm,
-                    unitCost: event.target.value,
+                    unitCost: Math.max(0, parseFloat(event.target.value) || 0),
                   })
                 }
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-slate-400"
@@ -715,16 +720,24 @@ export default function SupplierList() {
             <input
               type="number"
               min="0"
-              step="0.01"
+              step="any"
               value={purchaseForm.amountPaidNow}
               onChange={(event) =>
                 setPurchaseForm({
                   ...purchaseForm,
-                  amountPaidNow: event.target.value,
+                  amountPaidNow: Math.max(
+                    0,
+                    parseFloat(event.target.value) || 0,
+                  ),
                 })
               }
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-slate-400"
             />
+            {amountPaidNow > totalAmount && (
+              <p className="mt-1.5 text-sm text-red-600" role="alert">
+                Amount paid cannot exceed the total amount.
+              </p>
+            )}
           </div>
 
           <div className="grid gap-3 rounded-xl bg-slate-50 p-3 text-sm text-slate-700">

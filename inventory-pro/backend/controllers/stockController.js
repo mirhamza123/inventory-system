@@ -82,6 +82,31 @@ export const createTransaction = async (req, res) => {
         .json({ message: "Quantity must be greater than 0" });
     }
 
+    const normalizedDiscountType =
+      discountType === "percent" ? "percent" : "fixed";
+    const requestedDiscountValue = Number(discountValue ?? discount ?? 0);
+    const requestedDiscount = Number(discount ?? 0);
+    if (
+      !Number.isFinite(requestedDiscountValue) ||
+      requestedDiscountValue < 0 ||
+      !Number.isFinite(requestedDiscount) ||
+      requestedDiscount < 0
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Discount must be zero or greater" });
+    }
+
+    if (
+      type === "stock-out" &&
+      normalizedDiscountType === "percent" &&
+      requestedDiscountValue > 100
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Percentage discount cannot exceed 100%" });
+    }
+
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
@@ -115,13 +140,8 @@ export const createTransaction = async (req, res) => {
           ? product.wholesalePrice || product.price
           : product.retailPrice || product.price;
       const grossRevenue = Number(sellingPrice || 0) * normalizedQuantity;
-      const normalizedDiscountType =
-        discountType === "percent" ? "percent" : "fixed";
-      const normalizedDiscountValue = Math.max(
-        0,
-        Number(discountValue ?? discount ?? 0) || 0,
-      );
-      const normalizedDiscount = Math.max(0, Number(discount) || 0);
+      const normalizedDiscountValue = Math.max(0, requestedDiscountValue);
+      const normalizedDiscount = requestedDiscount;
       const safeDiscount =
         normalizedDiscountType === "percent"
           ? (Math.min(Math.max(normalizedDiscountValue, 0), 100) / 100) *

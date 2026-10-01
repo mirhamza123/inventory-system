@@ -133,6 +133,16 @@ export default function StockInOut() {
         return;
       }
 
+      if (!Number.isFinite(rawDiscountValue) || rawDiscountValue < 0) {
+        toast.error("Discount must be zero or greater.");
+        return;
+      }
+
+      if (form.discountType === "percent" && rawDiscountValue > 100) {
+        toast.error("Percentage discount cannot exceed 100%.");
+        return;
+      }
+
       if (!Number.isInteger(requestedQty)) {
         toast.error("Please enter a whole number quantity for stock out.");
         return;
@@ -318,19 +328,27 @@ export default function StockInOut() {
                       className="w-full rounded border p-3"
                       type="number"
                       min="0"
-                      step="0.01"
+                      max={form.discountType === "percent" ? "100" : undefined}
+                      step="any"
                       placeholder={
                         form.discountType === "percent"
                           ? "Discount %"
                           : `Discount Amount (${currencySymbol})`
                       }
                       value={form.discount}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const value = Math.max(
+                          0,
+                          parseFloat(e.target.value) || 0,
+                        );
                         setForm({
                           ...form,
-                          discount: e.target.value,
-                        })
-                      }
+                          discount:
+                            form.discountType === "percent"
+                              ? Math.min(value, 100)
+                              : value,
+                        });
+                      }}
                     />
                   </div>
                 </>

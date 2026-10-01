@@ -181,12 +181,28 @@ export const recordPurchase = async (req, res) => {
       return res.status(400).json({ message: "Valid unit cost is required" });
     }
 
+    if (!Number.isFinite(normalizedAmountPaid) || normalizedAmountPaid < 0) {
+      return res
+        .status(400)
+        .json({ message: "Amount paid must be zero or greater" });
+    }
+
+    const totalAmount = normalizedQuantity * normalizedUnitCost;
+    if (!Number.isFinite(totalAmount)) {
+      return res.status(400).json({ message: "Invalid purchase total" });
+    }
+
+    if (normalizedAmountPaid > totalAmount) {
+      return res
+        .status(400)
+        .json({ message: "Amount paid cannot exceed the total amount" });
+    }
+
     const supplier = await Supplier.findById(supplierId);
     if (!supplier) {
       return res.status(404).json({ message: "Supplier not found" });
     }
 
-    const totalAmount = normalizedQuantity * normalizedUnitCost;
     const payableAmount = Math.max(totalAmount - normalizedAmountPaid, 0);
 
     const product = await Product.findById(productId);
