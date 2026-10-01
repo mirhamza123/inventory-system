@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
+import NumberInput from "../components/common/NumberInput";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import { exportSalesReport } from "../utils/exportReports";
@@ -324,9 +325,8 @@ export default function StockInOut() {
                       <option value="fixed">Fixed</option>
                       <option value="percent">Percent</option>
                     </select>
-                    <input
+                    <NumberInput
                       className="w-full rounded border p-3"
-                      type="number"
                       min="0"
                       max={form.discountType === "percent" ? "100" : undefined}
                       step="any"
@@ -353,29 +353,15 @@ export default function StockInOut() {
                   </div>
                 </>
               )}
-              <input
+              <NumberInput
                 className="w-full rounded border p-3"
-                type="number"
                 min="1"
                 step="1"
                 placeholder="Quantity"
                 value={form.quantity}
-                onKeyDown={(event) => {
-                  if (["-", "e", "E"].includes(event.key)) {
-                    event.preventDefault();
-                  }
-                }}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  if (value !== "" && Number(value) <= 0) {
-                    toast.error("Quantity must be greater than 0.");
-                  }
-                  setForm({
-                    ...form,
-                    quantity:
-                      value === "" ? "" : Math.max(1, Math.abs(Number(value))),
-                  });
-                }}
+                onChange={(event) =>
+                  setForm({ ...form, quantity: event.target.value })
+                }
               />
               <input
                 className="w-full rounded border p-3"

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Plus, Search, Truck } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
+import NumberInput from "../components/common/NumberInput";
 import InventoryTable from "../components/InventoryTable";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
@@ -348,56 +349,45 @@ export default function Products() {
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
               />
-              <input
+              <NumberInput
                 className="w-full rounded border border-slate-200 p-3 text-sm"
-                type="number"
+                min="0"
+                step="any"
                 placeholder="Purchase Price"
                 value={form.purchasePrice}
                 onChange={(e) =>
                   setForm({ ...form, purchasePrice: e.target.value })
                 }
               />
-              <input
+              <NumberInput
                 className="w-full rounded border border-slate-200 p-3 text-sm"
-                type="number"
+                min="0"
+                step="any"
                 placeholder="Retail Price"
                 value={form.retailPrice}
                 onChange={(e) =>
                   setForm({ ...form, retailPrice: e.target.value })
                 }
               />
-              <input
+              <NumberInput
                 className="w-full rounded border border-slate-200 p-3 text-sm"
-                type="number"
+                min="0"
+                step="any"
                 placeholder="Wholesale Price"
                 value={form.wholesalePrice}
                 onChange={(e) =>
                   setForm({ ...form, wholesalePrice: e.target.value })
                 }
               />
-              <input
+              <NumberInput
                 className="w-full rounded border border-slate-200 p-3 text-sm"
-                type="number"
                 min="1"
                 step="1"
                 placeholder="Quantity"
                 value={form.quantity}
-                onKeyDown={(event) => {
-                  if (["-", "e", "E"].includes(event.key)) {
-                    event.preventDefault();
-                  }
-                }}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  if (value !== "" && Number(value) <= 0) {
-                    toast.error("Quantity must be greater than 0.");
-                  }
-                  setForm({
-                    ...form,
-                    quantity:
-                      value === "" ? "" : Math.max(1, Math.abs(Number(value))),
-                  });
-                }}
+                onChange={(event) =>
+                  setForm({ ...form, quantity: event.target.value })
+                }
               />
               <input
                 className="w-full rounded border border-slate-200 p-3 text-sm"

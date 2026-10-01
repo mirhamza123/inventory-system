@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import Modal from "../components/Modal";
+import NumberInput from "../components/common/NumberInput";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../context/AuthContext";
 import api from "../utils/api";
@@ -671,8 +672,7 @@ export default function SupplierList() {
               <label className="mb-1.5 block text-sm font-medium text-slate-700">
                 Quantity
               </label>
-              <input
-                type="number"
+              <NumberInput
                 min="0"
                 step="any"
                 value={purchaseForm.quantity}
@@ -696,8 +696,7 @@ export default function SupplierList() {
               <label className="mb-1.5 block text-sm font-medium text-slate-700">
                 Unit Cost
               </label>
-              <input
-                type="number"
+              <NumberInput
                 min="0"
                 step="any"
                 value={purchaseForm.unitCost}
@@ -717,8 +716,7 @@ export default function SupplierList() {
             <label className="mb-1.5 block text-sm font-medium text-slate-700">
               Amount Paid Now
             </label>
-            <input
-              type="number"
+            <NumberInput
               min="0"
               step="any"
               value={purchaseForm.amountPaidNow}

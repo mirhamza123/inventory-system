@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { toast } from "react-toastify";
+import NumberInput from "./common/NumberInput";
 
 export default function EditProductModal({ isOpen, onClose, product, onSave }) {
   const [form, setForm] = useState({
@@ -126,10 +127,9 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
             <label className="mb-2 block text-sm font-medium text-slate-700">
               Purchase Price ($)
             </label>
-            <input
-              type="number"
+            <NumberInput
               min="0"
-              step="0.01"
+              step="any"
               value={form.purchasePrice}
               onChange={handleFieldChange("purchasePrice")}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
@@ -140,10 +140,9 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
             <label className="mb-2 block text-sm font-medium text-slate-700">
               Retail Price ($)
             </label>
-            <input
-              type="number"
+            <NumberInput
               min="0"
-              step="0.01"
+              step="any"
               value={form.retailPrice}
               onChange={handleFieldChange("retailPrice")}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
@@ -154,10 +153,9 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
             <label className="mb-2 block text-sm font-medium text-slate-700">
               Wholesale Price ($)
             </label>
-            <input
-              type="number"
+            <NumberInput
               min="0"
-              step="0.01"
+              step="any"
               value={form.wholesalePrice}
               onChange={handleFieldChange("wholesalePrice")}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
@@ -168,27 +166,16 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
             <label className="mb-2 block text-sm font-medium text-slate-700">
               Quantity
             </label>
-            <input
-              type="number"
+            <NumberInput
               min="1"
               step="1"
               value={form.quantity}
-              onKeyDown={(event) => {
-                if (["-", "e", "E"].includes(event.key)) {
-                  event.preventDefault();
-                }
-              }}
-              onChange={(event) => {
-                const value = event.target.value;
-                if (value !== "" && Number(value) <= 0) {
-                  toast.error("Quantity must be greater than 0.");
-                }
+              onChange={(event) =>
                 setForm((current) => ({
                   ...current,
-                  quantity:
-                    value === "" ? "" : Math.max(1, Math.abs(Number(value))),
-                }));
-              }}
+                  quantity: event.target.value,
+                }))
+              }
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-1 focus:ring-slate-300"
             />
           </div>
